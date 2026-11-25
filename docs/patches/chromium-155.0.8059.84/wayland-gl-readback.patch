@@ -1,0 +1,98 @@
+diff --git a/ui/ozone/common/features.cc b/ui/ozone/common/features.cc
+index 774db0a..9d3a224 100644
+--- a/ui/ozone/common/features.cc
++++ b/ui/ozone/common/features.cc
+@@ -10,6 +10,10 @@ namespace ui {
+ // delegated compositing, but rather allows usage of subsurfaces for delegation.
+ BASE_FEATURE(kWaylandOverlayDelegation, base::FEATURE_DISABLED_BY_DEFAULT);
+ 
++// Present the composited GL framebuffer in a wl_shm buffer. This adds a
++// synchronous readback per frame but avoids the display DMA-BUF import path.
++BASE_FEATURE(kWaylandGLReadbackPresentation, base::FEATURE_DISABLED_BY_DEFAULT);
++
+ // Controls whether support for the fractional_scale_v1 protocol should be
+ // enabled.
+ BASE_FEATURE(kWaylandFractionalScaleV1, base::FEATURE_ENABLED_BY_DEFAULT);
+@@ -51,7 +55,8 @@ const base::FeatureParam<double> kWaylandUnscaledTouchpadScrollingNewFactor{
+     &kWaylandUnscaledTouchpadScrolling, "scroll_scaling_factor", 2.5};
+ 
+ bool IsWaylandOverlayDelegationEnabled() {
+-  return base::FeatureList::IsEnabled(kWaylandOverlayDelegation);
++  return base::FeatureList::IsEnabled(kWaylandOverlayDelegation) &&
++         !base::FeatureList::IsEnabled(kWaylandGLReadbackPresentation);
+ }
+ 
+ bool IsWaylandFractionalScaleV1Enabled() {
+diff --git a/ui/ozone/common/features.h b/ui/ozone/common/features.h
+index 18fe4a7..586ae1a 100644
+--- a/ui/ozone/common/features.h
++++ b/ui/ozone/common/features.h
+@@ -10,6 +10,7 @@
+ namespace ui {
+ 
+ BASE_DECLARE_FEATURE(kWaylandOverlayDelegation);
++BASE_DECLARE_FEATURE(kWaylandGLReadbackPresentation);
+ BASE_DECLARE_FEATURE(kWaylandFractionalScaleV1);
+ BASE_DECLARE_FEATURE(kPrettyPrintDrmModesetConfigLogs);
+ BASE_DECLARE_FEATURE(kUseDynamicCursorSize);
+diff --git a/ui/ozone/platform/wayland/gpu/wayland_surface_factory.cc b/ui/ozone/platform/wayland/gpu/wayland_surface_factory.cc
+index 2605b0e..b6ffd28 100644
+--- a/ui/ozone/platform/wayland/gpu/wayland_surface_factory.cc
++++ b/ui/ozone/platform/wayland/gpu/wayland_surface_factory.cc
+@@ -6,6 +6,7 @@
+ 
+ #include <memory>
+ 
++#include "base/feature_list.h"
+ #include "base/memory/ptr_util.h"
+ #include "base/memory/raw_ptr.h"
+ #include "components/viz/common/resources/shared_image_format_utils.h"
+@@ -15,6 +16,7 @@
+ #include "ui/gl/gl_surface_egl.h"
+ #include "ui/gl/presenter.h"
+ #include "ui/ozone/common/egl_util.h"
++#include "ui/ozone/common/features.h"
+ #include "ui/ozone/common/gl_ozone_egl.h"
+ #include "ui/ozone/common/native_pixmap_egl_binding.h"
+ #include "ui/ozone/platform/wayland/common/wayland_object.h"
+@@ -44,6 +46,11 @@ namespace ui {
+ 
+ namespace {
+ 
++bool UseReadbackPresentation() {
++  return gl::IsSoftwareGLImplementation(gl::GetGLImplementationParts()) ||
++         base::FeatureList::IsEnabled(kWaylandGLReadbackPresentation);
++}
++
+ class GLOzoneEGLWayland : public GLOzoneEGL {
+  public:
+   GLOzoneEGLWayland(WaylandConnection* connection,
+@@ -113,9 +120,7 @@ std::unique_ptr<NativePixmapGLBinding> GLOzoneEGLWayland::ImportNativePixmap(
+ scoped_refptr<gl::GLSurface> GLOzoneEGLWayland::CreateViewGLSurface(
+     gl::GLDisplay* display,
+     gfx::AcceleratedWidget widget) {
+-  // If we run with software GL implementation, use GLSurface which will read
+-  // pixels back and present via shared memory.
+-  if (gl::IsSoftwareGLImplementation(gl::GetGLImplementationParts())) {
++  if (UseReadbackPresentation()) {
+     return gl::InitializeGLSurface(
+         base::MakeRefCounted<GLSurfaceEglReadbackWayland>(
+             display->GetAs<gl::GLDisplayEGL>(), widget, buffer_manager_));
+@@ -145,7 +150,7 @@ scoped_refptr<gl::GLSurface> GLOzoneEGLWayland::CreateViewGLSurface(
+ scoped_refptr<gl::Presenter> GLOzoneEGLWayland::CreateSurfacelessViewGLSurface(
+     gl::GLDisplay* display,
+     gfx::AcceleratedWidget window) {
+-  if (gl::IsSoftwareGLImplementation(gl::GetGLImplementationParts())) {
++  if (UseReadbackPresentation()) {
+     return nullptr;
+   } else {
+ #if defined(WAYLAND_GBM)
+@@ -316,7 +321,7 @@ bool WaylandSurfaceFactory::SupportsNativePixmaps() const {
+   supports_native_pixmaps = buffer_manager_->GetGbmDevice() != nullptr;
+ #endif
+   // Native pixmaps are not supported with swiftshader.
+-  if (gl::IsSoftwareGLImplementation(gl::GetGLImplementationParts())) {
++  if (UseReadbackPresentation()) {
+     supports_native_pixmaps = false;
+   }
+   return supports_native_pixmaps;

@@ -1,0 +1,49 @@
+--- a/ui/ozone/platform/wayland/gpu/wayland_surface_factory.cc
++++ b/ui/ozone/platform/wayland/gpu/wayland_surface_factory.cc
+@@ -180,6 +180,18 @@
+ }
+ 
+ gl::EGLDisplayPlatform GLOzoneEGLWayland::GetNativeDisplay() {
++#if defined(WAYLAND_GBM)
++  // The readback surface is a pbuffer. Mesa's surfaceless platform takes
++  // EGL_DEFAULT_DISPLAY, whereas the GBM platform takes a gbm_device.
++  const auto angle = gl::GetGLImplementationParts().angle;
++  if (base::FeatureList::IsEnabled(kWaylandGLReadbackPresentation) &&
++      (angle == gl::ANGLEImplementation::kOpenGL ||
++       angle == gl::ANGLEImplementation::kOpenGLES ||
++       angle == gl::ANGLEImplementation::kDefault)) {
++    return gl::EGLDisplayPlatform(EGL_DEFAULT_DISPLAY,
++                                  EGL_PLATFORM_SURFACELESS_MESA);
++  }
++#endif
+   if (connection_) {
+     return connection_->GetNativeDisplay();
+   }
+--- a/ui/ozone/platform/wayland/gpu/wayland_gl_egl_utility.cc
++++ b/ui/ozone/platform/wayland/gpu/wayland_gl_egl_utility.cc
+@@ -5,6 +5,10 @@
+ #include "ui/ozone/platform/wayland/gpu/wayland_gl_egl_utility.h"
+ 
+ #include <algorithm>
++
++#include "base/feature_list.h"
++#include "third_party/khronos/EGL/eglext.h"
++#include "ui/ozone/common/features.h"
+ 
+ // From ANGLE's egl/eglext.h. Follows the same approach as in
+ // ui/gl/gl_surface_egl.cc
+@@ -60,7 +64,13 @@
+ 
+ #if defined(WAYLAND_GBM)
+   display_attributes->push_back(EGL_PLATFORM_ANGLE_NATIVE_PLATFORM_TYPE_ANGLE);
+-  display_attributes->push_back(EGL_PLATFORM_GBM_KHR);
++  const bool use_readback_pbuffer =
++      (platform_type == EGL_PLATFORM_ANGLE_TYPE_OPENGL_ANGLE ||
++       platform_type == EGL_PLATFORM_ANGLE_TYPE_OPENGLES_ANGLE) &&
++      base::FeatureList::IsEnabled(kWaylandGLReadbackPresentation);
++  display_attributes->push_back(use_readback_pbuffer
++                                    ? EGL_PLATFORM_SURFACELESS_MESA
++                                    : EGL_PLATFORM_GBM_KHR);
+ #endif  // defined(WAYLAND_GBM)
+ 
+   if (std::find(display_attributes->begin(), display_attributes->end(),

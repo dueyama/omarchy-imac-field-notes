@@ -1,0 +1,3 @@
+7a60eff3abaf9aff26be1dd34f61698168af0f4f7ce65e96f83a7df9cff1defa  wayland-gl-readback.patch
+aafbf38b885989b942f7715980556eaf9b4fa8f9bf1f10050c9a29bc64c0b4f4  args.gn
+c746ffa26d2a8a27793fc0658e51ed2a10b976168c6511a86e583f31097d389d  readback-pbuffer-v2.patch
