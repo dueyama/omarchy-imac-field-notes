@@ -23,14 +23,14 @@
       "実機のCodexデスクトップからコマンドとGUIを検証",
       "Chromium Readback v2 で Radeon の GPU 合成と WebGL",
       "再起動後のディスク自動解除と SDDM ログイン画面の起動（遠隔確認）",
-      "USB-A 変換アダプタと YubiKey で Google にログイン"
+      "USB-A 変換アダプタと YubiKey で Google とブラウザ版 ChatGPT にログイン"
     ],
     "pending": [
       "最終インストール後のHigh Sierra起動",
       "SDカードを抜いた状態での起動",
       "他のアプリの描画と長時間の安定性",
       "カスタムパッケージを維持した更新",
-      "同じ画質での動画再生と実際のデコーダー",
+      "同じ画質でのブラウザー動画再生、使用デコーダー、UVD 直接表示の連続再生",
       "Chromium の長時間安定性と毎フレームの読み戻しによる性能への影響"
     ],
     "sections": [
@@ -111,7 +111,11 @@
         "video",
         "Core 2 Duo での H.264 動画再生",
         [
-          "UVD を無効にした起動で、同じ 1080p・30fps の H.264 クリップを mpv で2回 CPU 復号した。CPU 使用率は1コア換算で 58.8% と 59.9%、コマ落ちはどちらも0。ハードウェア復号を指定するとプレーヤーは VA-API 使用と表示したが、Radeon は復号要求を拒否した。UVD 有効時との比較と、同じ画質でのブラウザー再生は未確認。"
+          "UVD を無効にした起動で、同じ 1080p・30fps の H.264 クリップを mpv で2回 CPU 復号した。CPU 使用率は1コア換算で 58.8% と 59.9%、コマ落ちはどちらも0。ハードウェア復号を指定するとプレーヤーは VA-API 使用と表示したが、Radeon は復号要求を拒否した。",
+          "UVD を有効にした試験起動では、標準の Mesa で H.264 を復号できたものの、映像に色の乱れが出た。Mesa 26.2.5 の試験用ドライバーで、圧縮データを Radeon のビデオメモリに置き、復号終了時の同期処理を修正した。システムにインストールした Mesa はそのまま使い、試験プロセスだけに修正版を読み込ませた。",
+          "同じ18秒の 1080p30 動画を使い、各コマの時刻・サイズ・画素ハッシュを CPU 復号と比較した。修正版でビデオメモリ入力をオン→オフ→オンにすると、540コマ中の一致数は 540 → 12 → 540 だった。表示を省いた復号試験では、CPU 時間は約4.88秒から0.47〜0.64秒に減った。一方、各コマの完了を待つ測定の実時間は約2.66秒から9.45〜9.62秒に延びた。",
+          "画面に表示すると結果は違った。mpv で表示を640×360以下にそろえた2回ずつの試験では、CPU 復号時の CPU 使用率は1コア換算で 65.4%・69.1%、GPU で復号した画像をメインメモリにコピーする方式では 68.0%・68.7% だった。GPU から直接表示する方式は短時間なら動き、CPU 再生と比べた3場面で目立つ崩れはなかった。",
+          "続く全編の比較中に画面が固まり、持ち主が電源を切って再起動した。最後に残ったのはコピー経由の試行開始時の空ログで、直接表示の全編測定に入った記録はない。停止原因と連続再生の安定性は未確認。通常起動では <code>radeon.uvd=0</code> に戻っている。"
         ]
       ],
       [
@@ -130,7 +134,8 @@
           "画面は無操作5分でロックして消灯する設定にし、アニメーションのスクリーンセーバーは無効にした。マウスを左下隅に約1秒置いてもロックし、そのまま待つと左下に置いてから約7秒で消灯した。復帰時のパスワード認証も確認した。",
           "zsh 5.9.2をソースからビルドしてユーザー領域に入れ、Footの起動シェルに指定した。標準の <code>ホスト名%</code> プロンプトが出ることを確認した。",
           "Git、GCC/G++、Make、Python、Node.js、npm、pnpm、Deno、Ruby、Neovimのバージョンを確認した。Docker CLIは確認済みで、コンテナの起動は未検証。",
-          "ビルド中の CPU・メモリ使用量は btop で確認できた。音声入力用の Superwhisper はクラウド処理に設定され、Option＋Space に割り当てられていた。"
+          "ビルド中の CPU・メモリ使用量は btop で確認できた。音声入力用の Superwhisper はクラウド処理に設定され、Option＋Space に割り当てられていた。",
+          "この再起動直後には USB 光学マウスも認識されず、Hyprland のマウス一覧は空だった。12:07 にカーネルが同じマウスを再検出し、夕方にも入力機器として登録されていた。ポインターが実際に動くようになったかは未確認。"
         ]
       ],
       [
@@ -138,8 +143,8 @@
         "Codex CLIとデスクトップアプリ",
         [
           "OmarchyのAgentsからCodex CLIを起動。2009年iMacの内蔵Bluetoothは2.1で、iPhoneでQRを読む方式に必要なBLEを備えていない。CLIの「Sign in with Device Code」を選び、iPhoneのブラウザで認証を完了できた。これはiMac側のデスクトップアプリやブラウザへのログインを兼ねない。",
-          "ブラウザ版ChatGPTでは、iPhoneでQRコードを読んでもパスキー認証が先に進まなかった。内蔵Bluetoothではスマホとの近接確認に使うBLEが使えず、ブラウザ版にはまだログインできていない。",
-          "USB-C の YubiKey を変換アダプタで iMac の USB-A 端子につなぎ、Omarchy 上で Google アカウントにログインできた。ブラウザ版 ChatGPT での YubiKey ログインは未確認。",
+          "ブラウザ版ChatGPTでは、iPhoneでQRコードを読んでもパスキー認証が先に進まなかった。この iMac の内蔵 Bluetooth は、スマートフォンとの近接確認に使う BLE に対応していない。",
+          "USB-C の YubiKey を変換アダプタで iMac の USB-A 端子につなぎ、Omarchy 上で Google アカウントにログインできた。同じ YubiKey でブラウザ版 ChatGPT にもログインできた。",
           "<strong>デスクトップ版の導入。</strong> この記録を担当するCodexが、OpenAI公式のArch Linux向けパッケージ <code>26.1120.41243</code> の署名とSHA-256を照合した。インストーラーとパッケージの設定フックは実行せず、本体をユーザー領域へ展開。システム更新を伴わない配置で、アプリは手動で更新する。 <a href=\"https://learn.chatgpt.com/docs/linux/linux-app\">公式Linuxガイド</a>",
           "アプリ一覧では <strong>ChatGPT (Codex)</strong>、端末では <code>chatgpt</code> で起動できる。内蔵Radeon向けにランチャーで <code>--ozone-platform=wayland --disable-gpu</code> を指定し、サインインに使う <code>codex:</code> リンクをユーザー単位で登録した。",
           "Core 2 Duo E7600の実機では、一時プロファイルを使ったヘッドレス起動で、サインイン画面の初期化とローカルのCodexサーバーへの接続をログで確認した。",
@@ -170,7 +175,8 @@
           "2026年11月24日（火）：ChromiumのWayland実機計測、画面ロック、Footのzsh設定、開発ツールとCodexデスクトップの確認結果を追記。",
           "同日追記：OpenAI公式パッケージからCodexデスクトップを配置した方法と、実機のヘッドレス起動結果を記録。",
           "2026年11月25日（水）：Readback の2枚のパッチ、Radeon の描画試験、既定ブラウザーの切替、H.264 の計測を追記。High Sierra の区画を残した手順とログイン画面の確認記録を補足。",
-          "同日追記：USB-A 変換アダプタと YubiKey を使った Google ログインを実機で確認。"
+          "同日追記：USB-A 変換アダプタと YubiKey を使った Google とブラウザ版 ChatGPT へのログインを実機で確認。",
+          "同日夜：H.264 の540コマ比較、mpv 再生時の負荷、全編測定の中断と再起動後の USB マウス再検出を追記。"
         ]
       ]
     ],
@@ -216,14 +222,14 @@
       "Commands and GUI checks from the desktop Codex app",
       "Radeon GPU compositing and WebGL in Chromium Readback v2",
       "Disk auto-unlock and SDDM greeter startup after reboot (remote check)",
-      "Google sign-in with a YubiKey through a USB-A adapter"
+      "Google and ChatGPT browser sign-in with a YubiKey through a USB-A adapter"
     ],
     "pending": [
       "High Sierra boot after final install",
       "Boot with the SD card removed",
       "Other apps and long-term graphics stability",
       "Updates with custom packages intact",
-      "Same-quality video playback and the decoder in use",
+      "Browser playback at matched quality, its selected decoder, and sustained direct UVD playback",
       "Long-term Chromium stability and the cost of per-frame readback"
     ],
     "sections": [
@@ -304,7 +310,11 @@
         "video",
         "H.264 playback on the Core 2 Duo",
         [
-          "With UVD disabled at boot, the same 1080p30 H.264 clip played twice in mpv using CPU decoding. CPU use was 58.8% and 59.9% of one core, with zero dropped frames in both runs. When hardware decoding was requested, the player reported VA-API but Radeon rejected the decode request. A comparison with UVD enabled and a browser playback test at matched quality are still open."
+          "With UVD disabled at boot, the same 1080p30 H.264 clip played twice in mpv using CPU decoding. CPU use was 58.8% and 59.9% of one core, with zero dropped frames in both runs. When hardware decoding was requested, the player reported VA-API but Radeon rejected the decode request.",
+          "On a test boot with UVD enabled, stock Mesa decoded H.264 but produced visibly corrupted frames. An experimental Mesa 26.2.5 driver placed the compressed input in Radeon video memory and fixed synchronization at decoder teardown. Only the test processes loaded this driver.",
+          "For the same 18-second 1080p30 clip, we compared timestamps, sizes and pixel hashes against CPU decoding. With video-memory input switched on, off and on again in the patched driver, 540, 12 and 540 of the 540 frames matched. In a decode-only test, process CPU time fell from about 4.88 s to 0.47–0.64 s. Elapsed time increased from about 2.66 s to 9.45–9.62 s when the test waited for each hardware-decoded frame.",
+          "Displaying the video changed the result. With mpv output limited to 640×360, CPU decoding used 65.4% and 69.1% of one core in two runs. Hardware decoding with frames copied back to system memory used 68.0% and 68.7%. Direct GPU presentation worked in a short trial. Three displayed scenes showed no obvious corruption when compared with CPU playback.",
+          "The owner reported a freeze during the subsequent full-length comparison and powered the iMac off. The last file was an empty log from the start of the copy-back run. There was no record of the full-length direct-presentation run starting. The cause of the freeze and sustained playback stability remain open. The iMac rebooted with its usual <code>radeon.uvd=0</code> setting."
         ]
       ],
       [
@@ -323,7 +333,8 @@
           "The screen now locks and blanks after five idle minutes, with the animated screensaver disabled. Holding the pointer in the bottom-left corner for about a second also locks the session. The display blanked about seven seconds after moving the pointer there. Password authentication on return was verified.",
           "zsh 5.9.2 was built from source in user space and selected as Foot’s startup shell. The standard <code>hostname%</code> prompt appeared.",
           "Versions were checked for Git, GCC/G++, Make, Python, Node.js, npm, pnpm, Deno, Ruby, and Neovim. The Docker CLI was present. Starting a container has yet to be tested.",
-          "The iMac also had btop for observing CPU and memory during builds. Superwhisper was configured for cloud processing and bound to Option–Space for dictation."
+          "The iMac also had btop for observing CPU and memory during builds. Superwhisper was configured for cloud processing and bound to Option–Space for dictation.",
+          "Immediately after this reboot, Linux did not detect the USB optical mouse and Hyprland listed no mice. The kernel detected the same mouse again at 12:07 JST, and it was still registered as an input device that evening. Pointer movement on screen has yet to be confirmed."
         ]
       ],
       [
@@ -331,8 +342,8 @@
         "Codex CLI and the desktop app",
         [
           "Codex CLI was launched from Omarchy’s Agents panel. The 2009 iMac’s built-in Bluetooth 2.1 lacks the BLE required by the phone-based passkey QR flow. Choosing “Sign in with Device Code” and completing authorization in the iPhone browser worked for the CLI. It did not sign in the iMac’s browser or desktop app.",
-          "In the iMac’s browser, the ChatGPT passkey sign-in did not progress after I scanned the QR code with my iPhone. The built-in Bluetooth hardware lacks BLE for the phone proximity check, and browser sign-in is still unresolved.",
-          "I connected my USB-C YubiKey to the iMac’s USB-A port with an adapter and signed in to my Google account on Omarchy. Signing in to ChatGPT in the browser with the YubiKey remains unverified.",
+          "In the iMac’s browser, the ChatGPT passkey sign-in did not progress after I scanned the QR code with my iPhone. The built-in Bluetooth hardware lacks BLE for the phone proximity check.",
+          "I connected my USB-C YubiKey to the iMac’s USB-A port with an adapter and signed in to my Google account on Omarchy. I also used the same YubiKey to sign in to ChatGPT in the browser.",
           "<strong>Desktop installation.</strong> The Codex task maintaining this record verified the signature and SHA-256 of OpenAI’s official Arch Linux package, version <code>26.1120.41243</code>. The app was extracted into user space, without running the installer or package hooks. This avoided a system upgrade. App updates are manual. <a href=\"https://learn.chatgpt.com/docs/linux/linux-app\">Official Linux guide</a>",
           "Open <strong>ChatGPT (Codex)</strong> from the app menu or run <code>chatgpt</code> in a terminal. The launcher passes <code>--ozone-platform=wayland --disable-gpu</code> for the built-in Radeon. The <code>codex:</code> sign-in link was registered for the current user.",
           "On the Core 2 Duo E7600 iMac, a headless run with a temporary profile initialized the sign-in screen and connected to the local Codex server, as confirmed in the app logs.",
@@ -363,7 +374,8 @@
           "Tue, Nov 24, 2026: added Chromium Wayland measurements, the screen-lock and Foot changes, and checks of the development tools and Codex desktop app.",
           "Same-day addition: documented how the Codex desktop app was installed from the official package and what the headless run verified on the iMac.",
           "Nov 25, 2026: added the two Readback patches, Radeon display tests, default browser switch, and H.264 measurements. Expanded the High Sierra partition and login-screen records.",
-          "Nov 25, 2026: confirmed Google sign-in on the iMac with a YubiKey and a USB-A adapter."
+          "Nov 25, 2026: confirmed sign-in to both Google and ChatGPT in the iMac’s browser with a YubiKey and a USB-A adapter.",
+          "Nov 25 evening: recorded the 540-frame H.264 comparison, mpv playback load, the interrupted full-length test and USB mouse redetection after reboot."
         ]
       ]
     ],
