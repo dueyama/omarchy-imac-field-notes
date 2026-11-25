@@ -22,7 +22,8 @@
       "Codex CLIのデバイスコード認証",
       "実機のCodexデスクトップからコマンドとGUIを検証",
       "Chromium Readback v2 で Radeon の GPU 合成と WebGL",
-      "再起動後のディスク自動解除と SDDM ログイン画面の起動（遠隔確認）"
+      "再起動後のディスク自動解除と SDDM ログイン画面の起動（遠隔確認）",
+      "USB-A 変換アダプタと YubiKey で Google にログイン"
     ],
     "pending": [
       "最終インストール後のHigh Sierra起動",
@@ -138,7 +139,7 @@
         [
           "OmarchyのAgentsからCodex CLIを起動。2009年iMacの内蔵Bluetoothは2.1で、iPhoneでQRを読む方式に必要なBLEを備えていない。CLIの「Sign in with Device Code」を選び、iPhoneのブラウザで認証を完了できた。これはiMac側のデスクトップアプリやブラウザへのログインを兼ねない。",
           "ブラウザ版ChatGPTでは、iPhoneでQRコードを読んでもパスキー認証が先に進まなかった。内蔵Bluetoothではスマホとの近接確認に使うBLEが使えず、ブラウザ版にはまだログインできていない。",
-          "<strong>次に試すこと：</strong>USB-CのYubiKeyをiMacのUSB-A端子につなぐため、変換アダプタを注文した。到着後にブラウザ版ChatGPTのログインを試す。まだ未検証。",
+          "USB-C の YubiKey を変換アダプタで iMac の USB-A 端子につなぎ、Omarchy 上で Google アカウントにログインできた。ブラウザ版 ChatGPT での YubiKey ログインは未確認。",
           "<strong>デスクトップ版の導入。</strong> この記録を担当するCodexが、OpenAI公式のArch Linux向けパッケージ <code>26.1120.41243</code> の署名とSHA-256を照合した。インストーラーとパッケージの設定フックは実行せず、本体をユーザー領域へ展開。システム更新を伴わない配置で、アプリは手動で更新する。 <a href=\"https://learn.chatgpt.com/docs/linux/linux-app\">公式Linuxガイド</a>",
           "アプリ一覧では <strong>ChatGPT (Codex)</strong>、端末では <code>chatgpt</code> で起動できる。内蔵Radeon向けにランチャーで <code>--ozone-platform=wayland --disable-gpu</code> を指定し、サインインに使う <code>codex:</code> リンクをユーザー単位で登録した。",
           "Core 2 Duo E7600の実機では、一時プロファイルを使ったヘッドレス起動で、サインイン画面の初期化とローカルのCodexサーバーへの接続をログで確認した。",
@@ -168,7 +169,8 @@
           "同日追記：ブラウザのパスキー認証で止まったことと、YubiKey用の変換アダプタを注文したことを記録。",
           "2026年11月24日（火）：ChromiumのWayland実機計測、画面ロック、Footのzsh設定、開発ツールとCodexデスクトップの確認結果を追記。",
           "同日追記：OpenAI公式パッケージからCodexデスクトップを配置した方法と、実機のヘッドレス起動結果を記録。",
-          "2026年11月25日（水）：Readback の2枚のパッチ、Radeon の描画試験、既定ブラウザーの切替、H.264 の計測を追記。High Sierra の区画を残した手順とログイン画面の確認記録を補足。"
+          "2026年11月25日（水）：Readback の2枚のパッチ、Radeon の描画試験、既定ブラウザーの切替、H.264 の計測を追記。High Sierra の区画を残した手順とログイン画面の確認記録を補足。",
+          "同日追記：USB-A 変換アダプタと YubiKey を使った Google ログインを実機で確認。"
         ]
       ]
     ],
@@ -213,7 +215,8 @@
       "Codex CLI sign-in via a device code",
       "Commands and GUI checks from the desktop Codex app",
       "Radeon GPU compositing and WebGL in Chromium Readback v2",
-      "Disk auto-unlock and SDDM greeter startup after reboot (remote check)"
+      "Disk auto-unlock and SDDM greeter startup after reboot (remote check)",
+      "Google sign-in with a YubiKey through a USB-A adapter"
     ],
     "pending": [
       "High Sierra boot after final install",
@@ -329,7 +332,7 @@
         [
           "Codex CLI was launched from Omarchy’s Agents panel. The 2009 iMac’s built-in Bluetooth 2.1 lacks the BLE required by the phone-based passkey QR flow. Choosing “Sign in with Device Code” and completing authorization in the iPhone browser worked for the CLI. It did not sign in the iMac’s browser or desktop app.",
           "In the iMac’s browser, the ChatGPT passkey sign-in did not progress after I scanned the QR code with my iPhone. The built-in Bluetooth hardware lacks BLE for the phone proximity check, and browser sign-in is still unresolved.",
-          "<strong>Next test:</strong> I ordered a USB-A to USB-C adapter to connect my USB-C YubiKey to the iMac. I’ll try signing in to ChatGPT in the browser once it arrives. This is still untested.",
+          "I connected my USB-C YubiKey to the iMac’s USB-A port with an adapter and signed in to my Google account on Omarchy. Signing in to ChatGPT in the browser with the YubiKey remains unverified.",
           "<strong>Desktop installation.</strong> The Codex task maintaining this record verified the signature and SHA-256 of OpenAI’s official Arch Linux package, version <code>26.1120.41243</code>. The app was extracted into user space, without running the installer or package hooks. This avoided a system upgrade. App updates are manual. <a href=\"https://learn.chatgpt.com/docs/linux/linux-app\">Official Linux guide</a>",
           "Open <strong>ChatGPT (Codex)</strong> from the app menu or run <code>chatgpt</code> in a terminal. The launcher passes <code>--ozone-platform=wayland --disable-gpu</code> for the built-in Radeon. The <code>codex:</code> sign-in link was registered for the current user.",
           "On the Core 2 Duo E7600 iMac, a headless run with a temporary profile initialized the sign-in screen and connected to the local Codex server, as confirmed in the app logs.",
@@ -359,7 +362,8 @@
           "Same-day update: recorded where the browser passkey flow got stuck and that a YubiKey adapter was ordered.",
           "Tue, Nov 24, 2026: added Chromium Wayland measurements, the screen-lock and Foot changes, and checks of the development tools and Codex desktop app.",
           "Same-day addition: documented how the Codex desktop app was installed from the official package and what the headless run verified on the iMac.",
-          "Nov 25, 2026: added the two Readback patches, Radeon display tests, default browser switch, and H.264 measurements. Expanded the High Sierra partition and login-screen records."
+          "Nov 25, 2026: added the two Readback patches, Radeon display tests, default browser switch, and H.264 measurements. Expanded the High Sierra partition and login-screen records.",
+          "Nov 25, 2026: confirmed Google sign-in on the iMac with a YubiKey and a USB-A adapter."
         ]
       ]
     ],
