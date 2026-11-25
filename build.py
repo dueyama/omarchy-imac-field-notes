@@ -37,9 +37,10 @@ for lang, page in json.loads((root / "content.json").read_text(encoding="utf-8")
         else f'<a href="{url}" lang="{code}" hreflang="{code}">{name}</a>'
         for code, (name, url, _) in languages.items()
     )
+    nav_label = "サイトナビゲーション" if lang == "ja" else "Site navigation"
     html = f"""<!doctype html>
 <html lang="{lang}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>{esc(h1)}</title><meta name="description" content="{esc(intro,quote=True)}">{metadata}<link rel="stylesheet" href="style.css"></head>
-<body><header><div class="wrap"><div class="label">OMARCHY / FIELD NOTES</div><nav class="lang" aria-label="Language">{switch}</nav></div></header>
+<body><header><div class="wrap"><div class="label">OMARCHY / FIELD NOTES</div><nav class="lang" aria-label="{nav_label}"><a href="https://github.com/dueyama/omarchy-imac-field-notes">GitHub</a>{switch}</nav></div></header>
 <div class="hero"><div class="wrap"><div class="eyebrow">{esc(date)}</div><h1>{esc(h1)}</h1><p class="intro">{esc(intro)}</p><ul class="spec">{badges}</ul></div></div>
 <main class="wrap"><div class="comparison">{photos}</div><nav class="toc" aria-label="Contents">{nav}</nav><div class="article"><article>{main}</article><aside class="callouts"><h2>{esc(status[0])}</h2><h3>{esc(status[1])}</h3><ul>{lists(passed)}</ul><h3 class="pending">{esc(status[2])}</h3><ul>{lists(pending)}</ul></aside></div></main>
 <footer><div class="wrap">{esc(footer)}</div></footer></body></html>"""
