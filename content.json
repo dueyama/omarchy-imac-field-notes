@@ -1,7 +1,7 @@
 {
   "ja": {
     "title": "2009年のiMacにOmarchyを入れる",
-    "intro": "標準のOmarchy 4.5.0インストーラーを2009年のiMacで起動すると、内蔵画面に同じロゴが2×2で並び、表示が崩れた。そこで公式ISOの起動構造を保ったまま、Radeonの修正を組み込んだ専用ISOを作った。下の2枚は、その標準ISOの起動時と、改修版R2で導入したあとのデスクトップ。",
+    "intro": "標準のOmarchy 4.5.0インストーラーを2009年のiMacで起動すると、内蔵画面に同じロゴが2×2で並び、表示が崩れた。そこで公式ISOの起動構造を保ったまま、Radeonの修正を組み込んだ専用ISOを作った。下の2枚は、その標準ISOの起動時と、改修版R2で導入したあとのデスクトップ。その後、実機を4.6 RC1へ更新し、Chromium の Radeon 動画復号と YouTube 再生時の負荷を測った。",
     "hardware": [
       "iMac10,1",
       "21.5インチ / Late 2009",
@@ -26,17 +26,26 @@
       "USB-A 変換アダプタと YubiKey で Google とブラウザ版 ChatGPT にログイン",
       "内蔵ディスクから試験カーネル 7.3.6 を起動し、Hyprland が内蔵 1080p を Radeon で描画",
       "4.6 RC1 への上書き更新後、ディスクの自動解除、内蔵 1080p での Hyprland ログインと Radeon 描画",
-      "4.6 RC1 の試験起動で、ローカル H.264 動画60フレームを Radeon で復号し CPU 参照と照合"
+      "4.6 RC1 の試験起動で、ローカル H.264 動画60フレームを Radeon で復号し CPU 参照と照合",
+      "試験用 Chromium で YouTube の720p・H.264を Radeon で復号"
     ],
     "pending": [
       "最終インストール後のHigh Sierra起動",
       "SDカードを抜いた状態での起動",
       "他のアプリの描画と長時間の安定性",
       "iMac 専用パッケージを使った今後の Omarchy 更新",
-      "同じ画質でのブラウザー動画再生、使用デコーダー、UVD 直接表示の連続再生",
-      "Chromium の長時間安定性と毎フレームの読み戻しによる性能への影響"
+      "Radeon での長時間動画再生と、Chromium の部分読み戻しを使った内蔵画面の目視",
+      "点灯時の YouTube で、全画面と部分読み戻しの負荷を同条件で比較"
     ],
     "sections": [
+      [
+        "display",
+        "Radeonと内蔵画面",
+        [
+          "標準の起動画面が4分割で重複して見える問題に対し、Omarchy 4.5.0をベースに改修版R2を作成した。対象機種かつ1080pの内蔵パネルに絞り、起動時のパネル設定を補正。クロックを108 MHzから138.5 MHzに変更し、RGB888/FPDIを有効化した。GPUのROMには書き込んでいない。",
+          "改修版ではインストーラーが普通に読め、導入後は内蔵画面を1920×1080で使えた。これはこの一台での結果で、他の機種や標準版の動作は示していない。"
+        ]
+      ],
       [
         "iso",
         "iMac専用ISOをどう作ったか",
@@ -47,24 +56,6 @@
           "<strong>4. 公式の起動構造を保ってISOに戻した。</strong> <code>mksquashfs</code> でライブ環境 <code>airootfs.sfs</code> をZstandard圧縮し、SHA-512の照合ファイルを作り直した。<code>xorriso -boot_image any replay</code> でGRUB設定、初期起動イメージ、SquashFSとハッシュを差し替え、元のISOの起動構造を引き継いだ。",
           "<strong>5. VMで検証し、実機で確かめた。</strong> 公式ISOがVMでインストーラーまで進むことを確認。Radeon修正だけを入れたR1ではインストーラーのパス判定の不具合を見つけ、R2で修正した。R2は再マウントして公式カーネルがバイト単位で同じこと、修正版モジュール、ハッシュと署名を確認。UEFI・Core 2 Duo相当・4 GBのVMで暗号化インストールを完了し、仮想インストール媒体を外して起動、導入後のUKIも確認した。ただしVMの描画はソフトウェアの <code>llvmpipe</code>。Radeon実機での表示・起動・Wi-Fiの確認とは分けている。 導入後の VM では Hyprland にログインし、Foot の同じウィンドウを別ワークスペースと別の画面座標に移動できた。",
           "<strong>成果物：</strong> <code>omarchy-4.5.0-imac10-1-r2-x86.iso</code>（6,689,390,592バイト）<br>SHA-256: <code>9a5b450eb67ccf4d3de2a385a52f7755ca4fed552928b298d420f70e649ddbc7</code><br>検証したイメージの識別情報で、このページからISOを配布しているわけではない。"
-        ]
-      ],
-      [
-        "provenance",
-        "修正の出自と、今回作った部分",
-        [
-          "<strong>土台：Omarchy公式。</strong> 起動メディアのベースは<a href=\"https://github.com/omacom/omarchy/releases/tag/v4.5.0\">Omarchy公式4.5.0のx86版</a>。インストーラー側は<a href=\"https://github.com/omacom/omarchy-iso/tree/d5136a69782c00fe8d53fc98e4f3a990447d4840\">公式omarchy-isoの参照ソース</a>と、ISO内の該当ファイル2点のハッシュを照合した。この参照コミットがISOに記録されていたわけではない。カーネル本体と圧縮されたインストール元イメージは公式配布物のまま。",
-          "<strong>採用したRadeon修正：choyerのリポジトリ。</strong> <a href=\"https://github.com/choyer/omarchy-vintage-intel-imac-fix/blob/0d5a406a312eb91c640c6137ef4e90813baa8778/patches/panel-encoder-combined.patch\"><code>patches/panel-encoder-combined.patch</code></a> を、参照コミット <code>0d5a406a312eb91c640c6137ef4e90813baa8778</code> から変更せずに採用。iMac10,1の対象パネルに限り、ビデオBIOSのパネル表のメモリ上のコピーを108 MHzからEDIDに合う138.5 MHzへ補正し、RGB888/FPDIを設定する。個別機種向けの既存対策で、今回クロック値を新たに発見したわけではない。<a href=\"https://doesitomarchy.com/fixes#omaboot.radeon-imac10-1-panel-clock\">OmaBoot?の同型機向け資料</a>にも同じパッチと <code>radeon.dpm=0 radeon.pcie_gen2=0 radeon.uvd=0</code> の併用が記録されている。この3つはchoyer側の<a href=\"https://github.com/choyer/omarchy-vintage-intel-imac-fix/blob/0d5a406a312eb91c640c6137ef4e90813baa8778/manifest.json#L12\">マニフェスト</a>と<a href=\"https://github.com/choyer/omarchy-vintage-intel-imac-fix/blob/0d5a406a312eb91c640c6137ef4e90813baa8778/tools/write-limine-entry.py#L9\">Limine項目生成コード</a>でも確認できる。R2もこの組み合わせを使ったが、各引数の効果は個別に検証していない。",
-          "<strong>採用したHyprland修正：こちらもchoyerのリポジトリ。</strong> <a href=\"https://github.com/hyprwm/Hyprland/blob/efb50993780079460b0cbed1363e2166a2de1d9f/src/render/shaders/glsl/border.glsl\">Hyprland 0.56.2の元のウィンドウ枠シェーダー</a>に対し、choyerが収録した<a href=\"https://github.com/choyer/omarchy-vintage-intel-imac-fix/blob/0d5a406a312eb91c640c6137ef4e90813baa8778/hyprland/border-alpha.patch\"><code>hyprland/border-alpha.patch</code></a>を変更せず適用。枠の外を描かない <code>discard</code> を、透明色を出す処理に替える。<a href=\"https://github.com/choyer/omarchy-vintage-intel-imac-fix/blob/0d5a406a312eb91c640c6137ef4e90813baa8778/README.md\">先行README</a>が説明する対象はソフトウェア描画 <code>llvmpipe</code> の枠の乱れ。実機のChromiumのちらつきやGPU停止に効くとは確認していない。",
-          "<strong>今回の作業：既存修正を、内蔵画面で最初から使えるISOに組み込んだ。</strong> <a href=\"https://github.com/choyer/omarchy-vintage-intel-imac-fix/blob/0d5a406a312eb91c640c6137ef4e90813baa8778/README.md\">先行手順</a>は標準ISOから外部画面やテキスト端末を使って導入し、修正を適用する流れ。R2では公式カーネルに合うRadeonモジュールとHyprlandを再ビルドして署名し、機種限定のGRUB項目、初期起動イメージ、インストール先へのパッケージ導入、Limine用UKIの再生成をつないだ。モジュールの単体ビルドに合わせたKbuildの調整もこちらの作業で、パネル補正ロジックの変更ではない。ISO再梱包からVM・実機での検証までが今回の作業。R2 は非公式ビルド。Radeon と Hyprland の2件は上記の先行修正を採用し、その後の Chromium 用の2枚はこのプロジェクトで作成・検証した。"
-        ]
-      ],
-      [
-        "display",
-        "Radeonと内蔵画面",
-        [
-          "標準の起動画面が4分割で重複して見える問題に対し、Omarchy 4.5.0をベースに改修版R2を作成した。対象機種かつ1080pの内蔵パネルに絞り、起動時のパネル設定を補正。クロックを108 MHzから138.5 MHzに変更し、RGB888/FPDIを有効化した。GPUのROMには書き込んでいない。",
-          "改修版ではインストーラーが普通に読め、導入後は内蔵画面を1920×1080で使えた。これはこの一台での結果で、他の機種や標準版の動作は示していない。"
         ]
       ],
       [
@@ -85,6 +76,24 @@
         ]
       ],
       [
+        "chromium",
+        "Chromiumの描き残し",
+        [
+          "Chromiumでスクロールすると、ちらつきや黒い描き残しが出た。Hyprlandで画面全体を描き直す比較では目立った変化がなく、元に戻した。",
+          "Chromiumだけ <code>~/.config/chromium-flags.conf</code> に <code>--disable-gpu</code> を1行足し、完全終了後に開き直すと、実機でちらつきが消えた。戻すにはその1行を消して開き直す。これはChromiumで効いた回避策で、他のアプリや根本原因は未確認。",
+          "別プロファイルでGPU無効化を外し、XWayland経由で試したところ、テスト中にRadeonの描画キュー（ring 0）が停止し、ドライバによるGPUリセットの直後にHyprlandがクラッシュした。セーフモードからいったんログイン画面に戻り、再ログインで通常のデスクトップに復帰。OSは再起動しておらず、この時点では普段のChromiumはGPU無効のままだった。試した経路は再実行しない。根本原因と動画の改善効果は未確認。",
+          "動画のデコードは画面描画とは別。<a href=\"https://www.x.org/RadeonFeature/#radeon-uvd-unified-video-decoder-hardware\">Radeonの機能表</a>では、RV730の動画デコーダーはH.264/AVCに対応するが、VP9やAV1には対応しない。現在の起動設定では動画デコーダーも無効にしている。"
+        ]
+      ],
+      [
+        "codex-sign-in",
+        "Codex CLI とブラウザーの認証",
+        [
+          "OmarchyのAgentsからCodex CLIを起動。2009年iMacの内蔵Bluetoothは2.1で、iPhoneでQRを読む方式に必要なBLEを備えていない。CLIの「Sign in with Device Code」を選び、iPhoneのブラウザで認証を完了できた。これはiMac側のデスクトップアプリやブラウザへのログインを兼ねない。",
+          "ブラウザ版ChatGPTでは、iPhoneでQRコードを読んでもパスキー認証が先に進まなかった。この iMac の内蔵 Bluetooth は、スマートフォンとの近接確認に使う BLE に対応していない。"
+        ]
+      ],
+      [
         "login",
         "電源投入からログイン画面まで",
         [
@@ -93,48 +102,13 @@
         ]
       ],
       [
-        "chromium",
-        "Chromiumの描き残し",
+        "codex",
+        "Codex デスクトップを導入",
         [
-          "Chromiumでスクロールすると、ちらつきや黒い描き残しが出た。Hyprlandで画面全体を描き直す比較では目立った変化がなく、元に戻した。",
-          "Chromiumだけ <code>~/.config/chromium-flags.conf</code> に <code>--disable-gpu</code> を1行足し、完全終了後に開き直すと、実機でちらつきが消えた。戻すにはその1行を消して開き直す。これはChromiumで効いた回避策で、他のアプリや根本原因は未確認。",
-          "別プロファイルでGPU無効化を外し、XWayland経由で試したところ、テスト中にRadeonの描画キュー（ring 0）が停止し、ドライバによるGPUリセットの直後にHyprlandがクラッシュした。セーフモードからいったんログイン画面に戻り、再ログインで通常のデスクトップに復帰。OSは再起動しておらず、この時点では普段のChromiumはGPU無効のままだった。試した経路は再実行しない。根本原因と動画の改善効果は未確認。",
-          "動画のデコードは画面描画とは別。<a href=\"https://www.x.org/RadeonFeature/#radeon-uvd-unified-video-decoder-hardware\">Radeonの機能表</a>では、RV730の動画デコーダーはH.264/AVCに対応するが、VP9やAV1には対応しない。現在の起動設定では動画デコーダーも無効にしている。",
-          "<strong>11月24日のWaylandネイティブでの追試。</strong> 一時プロファイルでGPU合成を有効にすると、スクロールに加え、背景色を変えるだけでも古い画素が残った。Waylandに共有バッファ（DMA-BUF）を渡す直前に、追跡した3枚の測定位置を読んだところ、7回すべてで前の色を確認した。画面上の縦1列の587画素は、変更の約0.7秒後に全画素が期待色と異なり、約2.6秒後にすべて一致した。途中の画素取得を省いた試験でも約2.6秒後には一致したが、初期表示の乱れは同じ時点にも残った。",
-          "部分更新を全体更新に置き換えても、共有バッファの書き込み完了を示す取得可能なフェンスを待っても、乱れは残った。この時点では Chromium・Mesa・Hyprland のどこで問題が起きるかを特定できなかった。",
-          "<strong>GPU合成だけを止めた対照試験。</strong> 一時プロファイルで <code>--disable-gpu-compositing</code> を指定すると、比較した8画面すべてが期待色と一致し、WebGLは有効だった。普段使いのChromiumの設定はチェックサムで維持を確認。試験導入したGoogle Chrome 158は本体とランチャーを削除し、閲覧データは保存した。",
-          "途中ではウェブページにごく薄いアニメーションを重ね、GPU 合成を続けさせる方法も試した。背景色変更とスクロールの計16画面で、125 ms 後の測定位置は期待色に一致した。内部ページには効かず、その後は下記のソース修正に移った。",
-          "<strong>11月25日の Readback 試験版。</strong> Chromium 155.0.8059.84 に、GL の合成結果を同期的に読み戻し、Wayland に共有メモリ（<code>wl_shm</code>）で渡す経路を追加した。フレームの表示に使う DMA-BUF の取り込み経路を回避する。機能の既定はオフで、比較には <code>--enable-features=WaylandGLReadbackPresentation</code> を使う。",
-          "最初のパッチで共有メモリ経由の表示を選べるようになったが、この Radeon では EGL が読み戻し用の画面外バッファを作れなかった。2枚目で Readback 時のバッファに Mesa の surfaceless EGL を使うようにした。2枚を順に適用したものが Readback v2。",
-          "実機のネイティブ Wayland では AMD RV730 / ANGLE OpenGL で GPU 合成と WebGL が有効になり、ウィンドウサイズの wl_shm バッファを確認した。試験中の GPU プロセスクラッシュは0回。静止2ページを各3回、さらにスクロール8位置でブラウザーの画像と実画面を比較し、しきい値5%での差はポインター領域だけだった。背景の縦587画素は8位置すべてで初回も安定後も一致した。",
-          "Readback v2 を既定の Chromium にし、配布版を削除した後も、アプリメニュー、端末、xdg-open で開くリンク、Omarchy のウェブアプリから修正版が起動することを確認した。比較用の起動項目は撤去し、このユーザー領域の修正版は手動更新としている。"
-        ]
-      ],
-      [
-        "video",
-        "Core 2 Duo での H.264 動画再生",
-        [
-          "UVD を無効にした起動で、同じ 1080p・30fps の H.264 クリップを mpv で2回 CPU 復号した。CPU 使用率は1コア換算で 58.8% と 59.9%、コマ落ちはどちらも0。ハードウェア復号を指定するとプレーヤーは VA-API 使用と表示したが、Radeon は復号要求を拒否した。",
-          "UVD を有効にした試験起動では、標準の Mesa で H.264 を復号できたものの、映像に色の乱れが出た。Mesa 26.2.5 の試験用ドライバーで、圧縮データを Radeon のビデオメモリに置き、復号終了時の同期処理を修正した。システムにインストールした Mesa はそのまま使い、試験プロセスだけに修正版を読み込ませた。",
-          "同じ18秒の 1080p30 動画を使い、各コマの時刻・サイズ・画素ハッシュを CPU 復号と比較した。修正版でビデオメモリ入力をオン→オフ→オンにすると、540コマ中の一致数は 540 → 12 → 540 だった。表示を省いた復号試験では、CPU 時間は約4.88秒から0.47〜0.64秒に減った。一方、各コマの完了を待つ測定の実時間は約2.66秒から9.45〜9.62秒に延びた。",
-          "画面に表示すると結果は違った。mpv で表示を640×360以下にそろえた2回ずつの試験では、CPU 復号時の CPU 使用率は1コア換算で 65.4%・69.1%、GPU で復号した画像をメインメモリにコピーする方式では 68.0%・68.7% だった。GPU から直接表示する方式は短時間なら動き、CPU 再生と比べた3場面で目立つ崩れはなかった。",
-          "続く全編の比較中に画面が固まり、持ち主が電源を切って再起動した。最後に残ったのはコピー経由の試行開始時の空ログで、直接表示の全編測定に入った記録はない。その再起動では通常設定の <code>radeon.uvd=0</code> に戻った。停止原因と連続再生の安定性は未確認。",
-          "11月27日、4.6 RC1 の実機で <code>radeon.uvd=1</code> を一度の起動に限って有効にし、試作 Mesa ドライバーを使って FFmpeg の VA-API でローカルの 1080p30 H.264 を復号した。全60フレームの画素ハッシュが CPU 参照と一致し、復号エラーは0件だった。復号から読み戻しまでの実時間は約1.65秒。",
-          "既存の Chromium Readback v2 は H.264 を無効にしてビルドされており、同じクリップを開くと対応ストリームなしで止まった。H.264 対応の候補版を別にビルド中。Chromium や YouTube でのハードウェア復号と再生性能は未確認。"
-        ]
-      ],
-      [
-        "updates",
-        "4.6 RC1 に向けたカーネル試験",
-        [
-          "11月27日、Omarchy 4.5 の既定起動を保ったまま、内蔵ディスクの Limine メニューに <code>7.3.6-1-omarchy</code> の試験項目を追加した。4.6 RC1 と同じカーネルに、iMac のパネル用 Radeon 修正を組み合わせた。試験用の SD は作らず、仮想マシンで通常カーネルへの復帰を確認してから実機で試した。 <a href=\"https://github.com/omacom/omarchy/releases/tag/v4.6.0-rc1\">Omarchy 4.6 RC1 リリースノート</a>",
-          "実機の初回試験は緊急モードで止まった。通常起動時に、パッケージ管理外の試験モジュールが整理処理で退避されていた。試験用の Radeon は起動イメージに入っていた。起動後に必要な VFAT と Netfilter のモジュールが見つからず、<code>/boot</code> のマウントとファイアウォールが失敗した。",
-          "試験カーネルのモジュール一式を署名付きの独立した pacman パッケージにした。既定の 4.5 を先に起動する順序でも消えないことを仮想マシンで再確認。実機の再試験では <code>/boot</code>、ファイアウォール、SDDM が正常に起動し、Hyprland が内蔵パネルを 1920×1080 で使った。描画ログは <code>AMD RV730</code>。画面の枠と長時間の安定性は引き続き検証する。",
-          "この実機試験で使ったデスクトップは Omarchy 4.5。別に暗号化済みの 4.5 仮想ディスクを複製し、4.6 RC1 へ上書きした。公式リポジトリから本体とカーネルを、ビルド機の署名付きリポジトリから iMac 用 Radeon と枠修正版 Hyprland を導入した。",
-          "仮想マシンは暗号化ディスクを自動解除して SDDM のログイン画面まで進んだ。ログイン後に Foot を開き、別のワークスペースと画面内へ動かせた。その後、Limine の保存スナップショットから 4.5 を起動して復元を実行し、旧カーネル <code>7.2.15-1-omarchy</code> と Hyprland が通常起動に戻ることを確認した。",
-          "実機でも、4.5 の復帰用スナップショットとホームの読み取り専用スナップショットを作り、内蔵ディスク上で <code>4.6.0rc1-2</code> と iMac 用の修正パッケージを導入した。設定移行を終え、通常起動用の新しい UKI にカーネル、修正版 Radeon、自動解除用ファイルが入っていることを照合した。",
-          "再起動後に SSH で RC1 とカーネル <code>7.3.6-1-omarchy</code> を確認した。暗号化ディスクが自動解除され、ファイアウォールと SDDM が起動した。ログイン後の内蔵画面にはデスクトップと Omarchy のバーが表示された。Hyprland は内蔵 <code>LVDS-1</code> を 1920×1080 で使用し、描画ログが Radeon の <code>AMD RV730</code> を報告した。Limine に 4.5 の復帰項目も残った。",
-          "SSH で更新したときに Chrome への切り替え案内を表示できず、その地点から後の設定移行が保留された。RC1 のデスクトップにログインしてから残り14件を適用し、移行の残件が0件、既定ブラウザーが Chromium であることを確認した。実機で検証用の Foot を開き、ウィンドウを画面内で移動できた。枠の目視と長時間の安定性は引き続き確認する。"
+          "<strong>デスクトップ版の導入。</strong> この記録を担当するCodexが、OpenAI公式のArch Linux向けパッケージ <code>26.1120.41243</code> の署名とSHA-256を照合した。インストーラーとパッケージの設定フックは実行せず、本体をユーザー領域へ展開。システム更新を伴わない配置で、アプリは手動で更新する。 <a href=\"https://learn.chatgpt.com/docs/linux/linux-app\">公式Linuxガイド</a>",
+          "アプリ一覧では <strong>ChatGPT (Codex)</strong>、端末では <code>chatgpt</code> で起動できる。内蔵Radeon向けにランチャーで <code>--ozone-platform=wayland --disable-gpu</code> を指定し、サインインに使う <code>codex:</code> リンクをユーザー単位で登録した。",
+          "Core 2 Duo E7600の実機では、一時プロファイルを使ったヘッドレス起動で、サインイン画面の初期化とローカルのCodexサーバーへの接続をログで確認した。",
+          "11月24日、iMac上のCodexデスクトップのチャットから実機のコマンドを実行し、GUIを使った検証も行えた。この作業では新規サインインの手順は確認していない。"
         ]
       ],
       [
@@ -142,25 +116,116 @@
         "実機の設定と開発環境",
         [
           "画面は無操作5分でロックして消灯する設定にし、アニメーションのスクリーンセーバーは無効にした。マウスを左下隅に約1秒置いてもロックし、そのまま待つと左下に置いてから約7秒で消灯した。復帰時のパスワード認証も確認した。",
-          "zsh 5.9.2をソースからビルドしてユーザー領域に入れ、Footの起動シェルに指定した。標準の <code>ホスト名%</code> プロンプトが出ることを確認した。11月27日には SSH の対話セッションも同じ zsh を起動するようにした。",
+          "zsh 5.9.2をソースからビルドしてユーザー領域に入れ、Footの起動シェルに指定した。標準の <code>ホスト名%</code> プロンプトが出ることを確認した。",
           "Git、GCC/G++、Make、Python、Node.js、npm、pnpm、Deno、Ruby、Neovimのバージョンを確認した。Docker CLIは確認済みで、コンテナの起動は未検証。",
-          "ビルド中の CPU・メモリ使用量は btop で確認できた。音声入力用の Superwhisper はクラウド処理に設定され、Option＋Space に割り当てられていた。",
-          "この再起動直後には USB 光学マウスも認識されず、Hyprland のマウス一覧は空だった。12:07 にカーネルが同じマウスを再検出し、夕方にも入力機器として登録されていた。ポインターが実際に動くようになったかは未確認。"
+          "ビルド中の CPU・メモリ使用量は btop で確認できた。音声入力用の Superwhisper はクラウド処理に設定され、Option＋Space に割り当てられていた。"
         ]
       ],
       [
-        "codex",
-        "Codex CLIとデスクトップアプリ",
+        "chromium-wayland",
+        "Wayland で描き残しを切り分ける",
         [
-          "OmarchyのAgentsからCodex CLIを起動。2009年iMacの内蔵Bluetoothは2.1で、iPhoneでQRを読む方式に必要なBLEを備えていない。CLIの「Sign in with Device Code」を選び、iPhoneのブラウザで認証を完了できた。これはiMac側のデスクトップアプリやブラウザへのログインを兼ねない。",
-          "ブラウザ版ChatGPTでは、iPhoneでQRコードを読んでもパスキー認証が先に進まなかった。この iMac の内蔵 Bluetooth は、スマートフォンとの近接確認に使う BLE に対応していない。",
-          "USB-C の YubiKey を変換アダプタで iMac の USB-A 端子につなぎ、Omarchy 上で Google アカウントにログインできた。同じ YubiKey でブラウザ版 ChatGPT にもログインできた。",
-          "<strong>デスクトップ版の導入。</strong> この記録を担当するCodexが、OpenAI公式のArch Linux向けパッケージ <code>26.1120.41243</code> の署名とSHA-256を照合した。インストーラーとパッケージの設定フックは実行せず、本体をユーザー領域へ展開。システム更新を伴わない配置で、アプリは手動で更新する。 <a href=\"https://learn.chatgpt.com/docs/linux/linux-app\">公式Linuxガイド</a>",
-          "アプリ一覧では <strong>ChatGPT (Codex)</strong>、端末では <code>chatgpt</code> で起動できる。内蔵Radeon向けにランチャーで <code>--ozone-platform=wayland --disable-gpu</code> を指定し、サインインに使う <code>codex:</code> リンクをユーザー単位で登録した。",
-          "Core 2 Duo E7600の実機では、一時プロファイルを使ったヘッドレス起動で、サインイン画面の初期化とローカルのCodexサーバーへの接続をログで確認した。",
-          "11月24日、iMac上のCodexデスクトップのチャットから実機のコマンドを実行し、GUIを使った検証も行えた。この作業では新規サインインの手順は確認していない。",
-          "11月27日、署名を検証した公式パッケージから <code>26.1120.50957</code> に更新した。ログイン情報とデータを引き継いで Wayland ウィンドウが開き、以前の Codex タスクから実機コマンドを実行できた。次回も端末から <code>chatgpt-update --check</code> で確認し、<code>chatgpt-update</code> でアプリを入れ替えて再起動できるようにした。",
+          "<strong>11月24日のWaylandネイティブでの追試。</strong> 一時プロファイルでGPU合成を有効にすると、スクロールに加え、背景色を変えるだけでも古い画素が残った。Waylandに共有バッファ（DMA-BUF）を渡す直前に、追跡した3枚の測定位置を読んだところ、7回すべてで前の色を確認した。画面上の縦1列の587画素は、変更の約0.7秒後に全画素が期待色と異なり、約2.6秒後にすべて一致した。途中の画素取得を省いた試験でも約2.6秒後には一致したが、初期表示の乱れは同じ時点にも残った。",
+          "部分更新を全体更新に置き換えても、共有バッファの書き込み完了を示す取得可能なフェンスを待っても、乱れは残った。この時点では Chromium・Mesa・Hyprland のどこで問題が起きるかを特定できなかった。",
+          "<strong>GPU合成だけを止めた対照試験。</strong> 一時プロファイルで <code>--disable-gpu-compositing</code> を指定すると、比較した8画面すべてが期待色と一致し、WebGLは有効だった。普段使いのChromiumの設定はチェックサムで維持を確認。試験導入したGoogle Chrome 158は本体とランチャーを削除し、閲覧データは保存した。",
+          "途中ではウェブページにごく薄いアニメーションを重ね、GPU 合成を続けさせる方法も試した。背景色変更とスクロールの計16画面で、125 ms 後の測定位置は期待色に一致した。内部ページには効かず、その後は<a href=\"#chromium-readback\">Readback のソース修正</a>に移った。"
+        ]
+      ],
+      [
+        "chromium-readback",
+        "Chromium Readback v2 を既定に",
+        [
+          "<strong>11月25日の Readback 試験版。</strong> Chromium 155.0.8059.84 に、GL の合成結果を同期的に読み戻し、Wayland に共有メモリ（<code>wl_shm</code>）で渡す経路を追加した。フレームの表示に使う DMA-BUF の取り込み経路を回避する。機能の既定はオフで、比較には <code>--enable-features=WaylandGLReadbackPresentation</code> を使う。",
+          "最初のパッチで共有メモリ経由の表示を選べるようになったが、この Radeon では EGL が読み戻し用の画面外バッファを作れなかった。2枚目で Readback 時のバッファに Mesa の surfaceless EGL を使うようにした。2枚を順に適用したものが Readback v2。",
+          "実機のネイティブ Wayland では AMD RV730 / ANGLE OpenGL で GPU 合成と WebGL が有効になり、ウィンドウサイズの wl_shm バッファを確認した。試験中の GPU プロセスクラッシュは0回。静止2ページを各3回、さらにスクロール8位置でブラウザーの画像と実画面を比較し、しきい値5%での差はポインター領域だけだった。背景の縦587画素は8位置すべてで初回も安定後も一致した。",
+          "Readback v2 を既定の Chromium にし、配布版を削除した後も、アプリメニュー、端末、xdg-open で開くリンク、Omarchy のウェブアプリから修正版が起動することを確認した。比較用の起動項目は撤去し、このユーザー領域の修正版は手動更新としている。"
+        ]
+      ],
+      [
+        "yubikey",
+        "YubiKey でブラウザーにログイン",
+        [
+          "USB-C の YubiKey を変換アダプタで iMac の USB-A 端子につなぎ、Omarchy 上で Google アカウントにログインできた。同じ YubiKey でブラウザ版 ChatGPT にもログインできた。"
+        ]
+      ],
+      [
+        "codex-graphics",
+        "Codex アプリの GPU 合成試験",
+        [
           "Codex デスクトップアプリが同梱する描画エンジン Owl でも GPU 合成を試した。強いちらつきが現れ、XWayland の試験では GPU プロセスが一度異常終了したため、試験を終了してアプリは GPU 無効設定に戻した。上流 Chromium 158 へのパッチ移植は適用確認までで、Owl の修正版ビルドや描画成功の記録はない。"
+        ]
+      ],
+      [
+        "video",
+        "H.264 の復号試験",
+        [
+          "UVD を無効にした起動で、同じ 1080p・30fps の H.264 クリップを mpv で2回 CPU 復号した。CPU 使用率は1コア換算で 58.8% と 59.9%、コマ落ちはどちらも0。ハードウェア復号を指定するとプレーヤーは VA-API 使用と表示したが、Radeon は復号要求を拒否した。",
+          "UVD を有効にした試験起動では、標準の Mesa で H.264 を復号できたものの、映像に色の乱れが出た。Mesa 26.2.5 の試験用ドライバーで、圧縮データを Radeon のビデオメモリに置き、復号終了時の同期処理を修正した。システムにインストールした Mesa はそのまま使い、試験プロセスだけに修正版を読み込ませた。",
+          "同じ18秒の 1080p30 動画を使い、各コマの時刻・サイズ・画素ハッシュを CPU 復号と比較した。修正版でビデオメモリ入力をオン→オフ→オンにすると、540コマ中の一致数は 540 → 12 → 540 だった。表示を省いた復号試験では、CPU 時間は約4.88秒から0.47〜0.64秒に減った。一方、各コマの完了を待つ測定の実時間は約2.66秒から9.45〜9.62秒に延びた。",
+          "画面に表示すると結果は違った。mpv で表示を640×360以下にそろえた2回ずつの試験では、CPU 復号時の CPU 使用率は1コア換算で 65.4%・69.1%、GPU で復号した画像をメインメモリにコピーする方式では 68.0%・68.7% だった。GPU から直接表示する方式は短時間なら動き、CPU 再生と比べた3場面で目立つ崩れはなかった。",
+          "続く全編の比較中に画面が固まり、持ち主が電源を切って再起動した。最後に残ったのはコピー経由の試行開始時の空ログで、直接表示の全編測定に入った記録はない。その再起動では通常設定の <code>radeon.uvd=0</code> に戻った。停止原因と連続再生の安定性は未確認。",
+          "この再起動直後には USB 光学マウスも認識されず、Hyprland のマウス一覧は空だった。12:07 にカーネルが同じマウスを再検出し、夕方にも入力機器として登録されていた。ポインターが実際に動くようになったかは未確認。",
+          "RC1 の導入後に <a href=\"#youtube\">Chromium と YouTube の GPU 復号</a>を再検証した。"
+        ]
+      ],
+      [
+        "codex-update",
+        "Codex デスクトップの更新",
+        [
+          "11月27日、署名を検証した公式パッケージから <code>26.1120.50957</code> に更新した。ログイン情報とデータを引き継いで Wayland ウィンドウが開き、以前の Codex タスクから実機コマンドを実行できた。次回も端末から <code>chatgpt-update --check</code> で確認し、<code>chatgpt-update</code> でアプリを入れ替えて再起動できるようにした。"
+        ]
+      ],
+      [
+        "updates",
+        "Limine で試験カーネルを起動",
+        [
+          "11月27日、Omarchy 4.5 の既定起動を保ったまま、内蔵ディスクの Limine メニューに <code>7.3.6-1-omarchy</code> の試験項目を追加した。4.6 RC1 と同じカーネルに、iMac のパネル用 Radeon 修正を組み合わせた。試験用の SD は作らず、仮想マシンで通常カーネルへの復帰を確認してから実機で試した。 <a href=\"https://github.com/omacom/omarchy/releases/tag/v4.6.0-rc1\">Omarchy 4.6 RC1 リリースノート</a>",
+          "実機の初回試験は緊急モードで止まった。通常起動時に、パッケージ管理外の試験モジュールが整理処理で退避されていた。試験用の Radeon は起動イメージに入っていた。起動後に必要な VFAT と Netfilter のモジュールが見つからず、<code>/boot</code> のマウントとファイアウォールが失敗した。",
+          "試験カーネルのモジュール一式を署名付きの独立した pacman パッケージにした。既定の 4.5 を先に起動する順序でも消えないことを仮想マシンで再確認。実機の再試験では <code>/boot</code>、ファイアウォール、SDDM が正常に起動し、Hyprland が内蔵パネルを 1920×1080 で使った。描画ログは <code>AMD RV730</code>。画面の枠と長時間の安定性は引き続き検証する。",
+          "試験起動のあと、<a href=\"#rc1-upgrade\">4.6 RC1 への上書き更新</a>を検証した。"
+        ]
+      ],
+      [
+        "ssh-zsh",
+        "SSH でも Foot と同じ zsh",
+        [
+          "SSH でログインした時も、Foot と同じユーザー領域の zsh 5.9.2 を起動するようにした。"
+        ]
+      ],
+      [
+        "rc1-upgrade",
+        "4.5 から 4.6 RC1 へ上書き更新",
+        [
+          "Limine の試験起動で使ったデスクトップは Omarchy 4.5。別に暗号化済みの 4.5 仮想ディスクを複製し、4.6 RC1 へ上書きした。公式リポジトリから本体とカーネルを、ビルド機の署名付きリポジトリから iMac 用 Radeon と枠修正版 Hyprland を導入した。",
+          "仮想マシンは暗号化ディスクを自動解除して SDDM のログイン画面まで進んだ。ログイン後に Foot を開き、別のワークスペースと画面内へ動かせた。その後、Limine の保存スナップショットから 4.5 を起動して復元を実行し、旧カーネル <code>7.2.15-1-omarchy</code> と Hyprland が通常起動に戻ることを確認した。",
+          "実機でも、4.5 の復帰用スナップショットとホームの読み取り専用スナップショットを作り、内蔵ディスク上で <code>4.6.0rc1-2</code> と iMac 用の修正パッケージを導入した。設定移行を終え、通常起動用の新しい UKI にカーネル、修正版 Radeon、自動解除用ファイルが入っていることを照合した。",
+          "再起動後に SSH で RC1 とカーネル <code>7.3.6-1-omarchy</code> を確認した。暗号化ディスクが自動解除され、ファイアウォールと SDDM が起動した。ログイン後の内蔵画面にはデスクトップと Omarchy のバーが表示された。Hyprland は内蔵 <code>LVDS-1</code> を 1920×1080 で使用し、描画ログが Radeon の <code>AMD RV730</code> を報告した。Limine に 4.5 の復帰項目も残った。",
+          "SSH で更新したときに Chrome への切り替え案内を表示できず、その地点から後の設定移行が保留された。RC1 のデスクトップにログインしてから残り14件を適用し、移行の残件が0件、既定ブラウザーが Chromium であることを確認した。実機で検証用の Foot を開き、ウィンドウを画面内で移動できた。枠の目視と長時間の安定性は引き続き確認する。"
+        ]
+      ],
+      [
+        "youtube",
+        "YouTube の GPU 再生と負荷",
+        [
+          "11月27日、4.6 RC1 の実機で <code>radeon.uvd=1</code> を一度の起動に限って有効にし、試作 Mesa ドライバーを使って FFmpeg の VA-API でローカルの 1080p30 H.264 を復号した。全60フレームの画素ハッシュが CPU 参照と一致し、復号エラーは0件だった。復号から読み戻しまでの実時間は約1.65秒。",
+          "この時点の Chromium Readback v2 は H.264 を無効にしてビルドされており、同じクリップを開くと対応ストリームなしで止まった。",
+          "11月27日、H.264を有効にした Chromium の試験版を作った。初版では Radeon の <code>VaapiVideoDecoder</code> が選ばれたものの、復号した画像を Chromium の共有画像として取り込めず、ローカル動画が4フレームで止まった。試験版の次の修正で、その取り込みを有効にした。ちらつき対策の Wayland 共有メモリ表示は引き続き使った。",
+          "修正版はローカルの1080p・30fps H.264動画を60フレーム、コマ落ち0で完走した。YouTube の初回は AV1 が選ばれたため、試験時だけブラウザーが動画コーデックとして H.264 のみの対応を通知するようにした。YouTube で240pの H.264 を約8.2秒再生し、Radeon の復号と195フレーム、コマ落ち0を確認した。",
+          "同じ YouTube 動画を480p・H.264に固定した消灯時の比較では、Chromium 一式の CPU 使用率は CPU 復号45.3%、Radeon 復号46.3%だった。いずれも約20秒でコマ落ち0。後の計測で、内蔵画面が消灯している間は再生中に画面の読み戻しが起きないと分かった。使用率は2コア合計を100%としている。",
+          "点灯した画面でローカル720p24を再生すると、動画処理スレッドのCPU使用率は CPU 復号6.7%から Radeon 復号0.7%に下がった。同じ1600×940の窓では Chromium 全体は約56%から55%。Radeon 条件で窓を960×650に縮めると、全体は約36%に下がった。",
+          "次に1600×940の窓のまま、変化した領域だけを読み戻す試験をした。約10秒ずつのローカル720p比較で、読み戻しのCPU時間は0.73秒から0.28秒、読み戻し量は1.27 GBから0.49 GB、コマ落ちは28から7に減った。全画面を読み戻した参照と照合した283フレームは画素がすべて一致した。内蔵画面の目視と長時間の安定性は未確認。",
+          "点灯した実機で、部分読み戻し版が YouTube の720p・H.264を Radeon で復号した。約15.6秒で372フレーム、うち51フレームがコマ落ちした。iMac 全体のCPU使用率は約98%で、レンダラーのメインスレッドだけで約32%。同条件の全画面読み戻しは途中で終了し、YouTube での改善幅は未確定。測定は試験用の Chromium と一時プロファイルで実施した。 <a href=\"https://www.youtube.com/watch?v=YE7VzlLtp-4\">試験動画の Big Buck Bunny</a>",
+          "2009年11月の YouTube では360pが標準、480pが高画質、720pがHDで、1080pはその月に加わった。同年12月には、標準画質を既定にしてコメントなどを減らした軽量ページ「Feather」も試験公開された。Safari が使える HTML5 プレーヤーの試験公開は2010年1月。当時のMacでも標準画質が滑らかだったという見方には無理がない。同型機と当時のMac OS Xでの再生は今回未検証。 <a href=\"https://blog.youtube/news-and-events/1080p-hd-comes-to-youtube/\">2009年の画質案内</a> · <a href=\"https://blog.youtube/news-and-events/introducing-feather-lighter-way-to/\">Feather の発表</a> · <a href=\"https://blog.youtube/news-and-events/introducing-youtube-html5-supported/\">HTML5 プレーヤーの発表</a>"
+        ]
+      ],
+      [
+        "provenance",
+        "修正の出自と、今回作った部分",
+        [
+          "<strong>土台：Omarchy公式。</strong> 起動メディアのベースは<a href=\"https://github.com/omacom/omarchy/releases/tag/v4.5.0\">Omarchy公式4.5.0のx86版</a>。インストーラー側は<a href=\"https://github.com/omacom/omarchy-iso/tree/d5136a69782c00fe8d53fc98e4f3a990447d4840\">公式omarchy-isoの参照ソース</a>と、ISO内の該当ファイル2点のハッシュを照合した。この参照コミットがISOに記録されていたわけではない。カーネル本体と圧縮されたインストール元イメージは公式配布物のまま。",
+          "<strong>採用したRadeon修正：choyerのリポジトリ。</strong> <a href=\"https://github.com/choyer/omarchy-vintage-intel-imac-fix/blob/0d5a406a312eb91c640c6137ef4e90813baa8778/patches/panel-encoder-combined.patch\"><code>patches/panel-encoder-combined.patch</code></a> を、参照コミット <code>0d5a406a312eb91c640c6137ef4e90813baa8778</code> から変更せずに採用。iMac10,1の対象パネルに限り、ビデオBIOSのパネル表のメモリ上のコピーを108 MHzからEDIDに合う138.5 MHzへ補正し、RGB888/FPDIを設定する。個別機種向けの既存対策で、今回クロック値を新たに発見したわけではない。<a href=\"https://doesitomarchy.com/fixes#omaboot.radeon-imac10-1-panel-clock\">OmaBoot?の同型機向け資料</a>にも同じパッチと <code>radeon.dpm=0 radeon.pcie_gen2=0 radeon.uvd=0</code> の併用が記録されている。この3つはchoyer側の<a href=\"https://github.com/choyer/omarchy-vintage-intel-imac-fix/blob/0d5a406a312eb91c640c6137ef4e90813baa8778/manifest.json#L12\">マニフェスト</a>と<a href=\"https://github.com/choyer/omarchy-vintage-intel-imac-fix/blob/0d5a406a312eb91c640c6137ef4e90813baa8778/tools/write-limine-entry.py#L9\">Limine項目生成コード</a>でも確認できる。R2もこの組み合わせを使ったが、各引数の効果は個別に検証していない。",
+          "<strong>採用したHyprland修正：こちらもchoyerのリポジトリ。</strong> <a href=\"https://github.com/hyprwm/Hyprland/blob/efb50993780079460b0cbed1363e2166a2de1d9f/src/render/shaders/glsl/border.glsl\">Hyprland 0.56.2の元のウィンドウ枠シェーダー</a>に対し、choyerが収録した<a href=\"https://github.com/choyer/omarchy-vintage-intel-imac-fix/blob/0d5a406a312eb91c640c6137ef4e90813baa8778/hyprland/border-alpha.patch\"><code>hyprland/border-alpha.patch</code></a>を変更せず適用。枠の外を描かない <code>discard</code> を、透明色を出す処理に替える。<a href=\"https://github.com/choyer/omarchy-vintage-intel-imac-fix/blob/0d5a406a312eb91c640c6137ef4e90813baa8778/README.md\">先行README</a>が説明する対象はソフトウェア描画 <code>llvmpipe</code> の枠の乱れ。実機のChromiumのちらつきやGPU停止に効くとは確認していない。",
+          "<strong>今回の作業：既存修正を、内蔵画面で最初から使えるISOに組み込んだ。</strong> <a href=\"https://github.com/choyer/omarchy-vintage-intel-imac-fix/blob/0d5a406a312eb91c640c6137ef4e90813baa8778/README.md\">先行手順</a>は標準ISOから外部画面やテキスト端末を使って導入し、修正を適用する流れ。R2では公式カーネルに合うRadeonモジュールとHyprlandを再ビルドして署名し、機種限定のGRUB項目、初期起動イメージ、インストール先へのパッケージ導入、Limine用UKIの再生成をつないだ。モジュールの単体ビルドに合わせたKbuildの調整もこちらの作業で、パネル補正ロジックの変更ではない。ISO再梱包からVM・実機での検証までが今回の作業。R2 は非公式ビルド。Radeon と Hyprland の2件は上記の先行修正を採用し、その後の Chromium 用の2枚はこのプロジェクトで作成・検証した。"
         ]
       ],
       [
@@ -168,16 +233,22 @@
         "パッチとビルド設定",
         [
           "<a href=\"patches/chromium-155.0.8059.84/wayland-gl-readback.patch\" download>1. Chromium 155.0.8059.84 用の Wayland Readback パッチ</a> · <a href=\"patches/chromium-155.0.8059.84/readback-pbuffer-v2.patch\" download>2. EGL バッファの修正</a> · <a href=\"patches/chromium-155.0.8059.84/SHA256SUMS\">SHA-256</a> · <a href=\"patches/chromium-155.0.8059.84/args.gn\">GN 設定</a> · <a href=\"https://chromium.googlesource.com/chromium/src/+/5869fe313571d75152b77813cf0a4ee26a4e6df0\">固定した Chromium ソース</a>",
-          "対象は Ozone Wayland を使う Linux x86_64。確認対象の iMac は Core 2 Duo E7600 と Radeon HD 4670 を搭載する。フレームごとに同期読み戻しが入るため、実機での性能は別に評価する。",
+          "対象は Ozone Wayland を使う Linux x86_64。確認対象の iMac は Core 2 Duo E7600 と Radeon HD 4670 を搭載する。同期読み戻しの測定と変更領域だけを読み戻す試験は <a href=\"#youtube\">YouTube の GPU 再生と負荷</a> に記録した。",
           "Radeon のパネル補正と Hyprland の枠シェーダー修正は先行プロジェクトの成果。採用した版と出典は「修正の出自と、今回作った部分」に記載した。",
           "Linux x86_64 版の全体ビルドは Apple Silicon 上の amd64 Docker で行い、最初は QEMU、途中から Rosetta を使った。iMac 自体でも初版の修正対象2本をコンパイルできた。実機側の全体ビルドは 53,356 工程中 16,910 で停止。実機で描画を確認した本体は Apple Silicon 側のビルドで、既存の生成物を使った v2 の差分ビルドはリンクまで約51秒だった。"
         ]
       ],
       [
         "references",
-        "参考・追記履歴",
+        "参考資料",
         [
-          "<a href=\"https://github.com/omacom/omarchy/releases/tag/v4.5.0\">Omarchy 4.5.0</a> · <a href=\"https://github.com/choyer/omarchy-vintage-intel-imac-fix/tree/0d5a406a312eb91c640c6137ef4e90813baa8778\">旧Intel iMac向けの先行修正</a>",
+          "<a href=\"https://github.com/omacom/omarchy/releases/tag/v4.5.0\">Omarchy 4.5.0</a> · <a href=\"https://github.com/choyer/omarchy-vintage-intel-imac-fix/tree/0d5a406a312eb91c640c6137ef4e90813baa8778\">旧Intel iMac向けの先行修正</a>"
+        ]
+      ],
+      [
+        "journal",
+        "追記履歴",
+        [
           "2026年11月23日（月）：導入、起動、Wi-Fi、Chromium回避策までを初稿に記録。",
           "同日追記：XWaylandテスト中のGPU停止、復帰確認、Codex CLIのサインインを記録。",
           "同日追記：公式ISOからR2を再構成した工程と、VMでの検証範囲を追加。",
@@ -189,7 +260,8 @@
           "同日追記：USB-A 変換アダプタと YubiKey を使った Google とブラウザ版 ChatGPT へのログインを実機で確認。",
           "同日夜：H.264 の540コマ比較、mpv 再生時の負荷、全編測定の中断と再起動後の USB マウス再検出を追記。",
           "2026年11月27日（金）：Limine の試験カーネル、初回の起動停止、モジュールのパッケージ化による復旧を追記。仮想マシンと実機の 4.6 RC1 上書き更新、仮想マシンでの 4.5 への復帰、実機での内蔵 1080p・Radeon 描画と設定移行を記録。",
-          "同日追記：4.6 RC1 の実機での H.264 復号60フレームの照合と、既存 Chromium の H.264 非対応を追記。Codex アプリの更新も記録。"
+          "同日追記：4.6 RC1 の実機での H.264 復号60フレームの照合と、既存 Chromium の H.264 非対応を追記。Codex アプリの更新も記録。",
+          "同日夜：YouTube の H.264 GPU 復号、点灯時と消灯時のCPU計測、部分読み戻しの画素照合、当時の画質を追記。本文と目次を日付順に整理。"
         ]
       ]
     ],
@@ -209,11 +281,66 @@
         "改修版R2でインストールしたあと",
         "同じiMacの内蔵画面全体に、Omarchyのデスクトップが正常に表示された。"
       ]
+    ],
+    "chapters": [
+      [
+        "2026-11-23",
+        "11月23日 · 導入と初回起動",
+        [
+          "display",
+          "iso",
+          "storage",
+          "install",
+          "chromium",
+          "codex-sign-in"
+        ]
+      ],
+      [
+        "2026-11-24",
+        "11月24日 · ログインと描画",
+        [
+          "login",
+          "codex",
+          "daily",
+          "chromium-wayland"
+        ]
+      ],
+      [
+        "2026-11-25",
+        "11月25日 · ブラウザーと動画",
+        [
+          "chromium-readback",
+          "yubikey",
+          "codex-graphics",
+          "video"
+        ]
+      ],
+      [
+        "2026-11-27",
+        "11月27日 · RC1 と YouTube",
+        [
+          "codex-update",
+          "updates",
+          "ssh-zsh",
+          "rc1-upgrade",
+          "youtube"
+        ]
+      ],
+      [
+        "record",
+        "パッチ・資料・追記履歴",
+        [
+          "provenance",
+          "patches",
+          "references",
+          "journal"
+        ]
+      ]
     ]
   },
   "en": {
     "title": "Omarchy on a 2009 iMac",
-    "intro": "Booting the stock Omarchy 4.5.0 installer on a Late 2009 iMac produced a corrupted display: four copies of the same splash appeared in a 2×2 grid. I built a custom ISO with a Radeon fix while preserving the official boot layout. The photos show the stock boot splash and the desktop after installation from R2.",
+    "intro": "Booting the stock Omarchy 4.5.0 installer on a Late 2009 iMac produced a corrupted display: four copies of the same splash appeared in a 2×2 grid. I built a custom ISO with a Radeon fix while preserving the official boot layout. The photos show the stock boot splash and the desktop after installation from R2. The iMac later ran 4.6 RC1, where we tested Radeon video decoding in Chromium and measured YouTube playback.",
     "hardware": [
       "iMac10,1",
       "21.5-inch / Late 2009",
@@ -238,17 +365,26 @@
       "Google and ChatGPT browser sign-in with a YubiKey through a USB-A adapter",
       "Trial kernel 7.3.6 booted from the internal drive, with Radeon rendering in Hyprland at 1080p",
       "Disk auto-unlock and a Hyprland login at 1080p with Radeon rendering after the in-place 4.6 RC1 upgrade",
-      "All 60 frames of a local H.264 clip decoded by Radeon matched the CPU reference on a 4.6 RC1 trial boot"
+      "All 60 frames of a local H.264 clip decoded by Radeon matched the CPU reference on a 4.6 RC1 trial boot",
+      "Radeon decoded 720p H.264 on YouTube in a Chromium test build"
     ],
     "pending": [
       "High Sierra boot after final install",
       "Boot with the SD card removed",
       "Other apps and long-term graphics stability",
       "Future Omarchy upgrades with the iMac-specific packages",
-      "Browser playback at matched quality, its selected decoder, and sustained direct UVD playback",
-      "Long-term Chromium stability and the cost of per-frame readback"
+      "Sustained Radeon playback and visual inspection of the built-in panel with partial readback",
+      "A matched comparison of full and partial readback on YouTube with the panel on"
     ],
     "sections": [
+      [
+        "display",
+        "Radeon and the built-in display",
+        [
+          "The stock boot display was duplicated into four tiles. The modified R2 image was built from Omarchy 4.5.0 and corrects panel settings in memory, only for the matching model and 1080p internal panel. It changes the panel clock from 108 MHz to 138.5 MHz and enables RGB888/FPDI. The GPU ROM was not flashed.",
+          "The installer became readable, and the installed system used the built-in display at 1920×1080. This result is for one machine and does not establish support for other models or the unmodified image."
+        ]
+      ],
       [
         "iso",
         "How the custom installer ISO was built",
@@ -259,24 +395,6 @@
           "<strong>4. Repack without replacing the official boot layout.</strong> I rebuilt live <code>airootfs.sfs</code> with <code>mksquashfs</code> and Zstandard compression, then regenerated its SHA-512 sidecar. <code>xorriso -boot_image any replay</code> retained the original ISO’s boot layout while replacing the GRUB configuration, initramfs, SquashFS, and checksum.",
           "<strong>5. Verify the VM, then test physical hardware.</strong> The stock ISO reached the installer in a VM. The Radeon-only R1 smoke test uncovered an installer path-check issue, which was fixed in R2. I remounted R2 to check the byte-identical kernel, patched module, hashes, and signatures. A UEFI VM with a Core 2 Duo-class CPU and 4 GB RAM completed an encrypted install, booted with the virtual installer detached, and had the installed UKI verified. The VM used software <code>llvmpipe</code>, so it did not validate the physical Radeon display or Wi-Fi. In the installed VM session we opened Foot and moved its window across workspaces and to new coordinates.",
           "<strong>Build artifact:</strong> <code>omarchy-4.5.0-imac10-1-r2-x86.iso</code> (6,689,390,592 bytes)<br>SHA-256: <code>9a5b450eb67ccf4d3de2a385a52f7755ca4fed552928b298d420f70e649ddbc7</code><br>The hash identifies the tested artifact; this page is not distributing the ISO."
-        ]
-      ],
-      [
-        "provenance",
-        "Patch provenance and what this project added",
-        [
-          "<strong>Base: official Omarchy.</strong> The boot media is based on the <a href=\"https://github.com/omacom/omarchy/releases/tag/v4.5.0\">official Omarchy 4.5.0 x86 release</a>. For the installer, two matching file hashes tied the relevant files in the image to the <a href=\"https://github.com/omacom/omarchy-iso/tree/d5136a69782c00fe8d53fc98e4f3a990447d4840\">reference omarchy-iso source</a>; the reference commit was not read from embedded ISO metadata. The kernel binary and compressed installation payload remain the official files.",
-          "<strong>Radeon fix adopted from choyer’s repository.</strong> The build uses <a href=\"https://github.com/choyer/omarchy-vintage-intel-imac-fix/blob/0d5a406a312eb91c640c6137ef4e90813baa8778/patches/panel-encoder-combined.patch\"><code>patches/panel-encoder-combined.patch</code></a> unchanged from reference commit <code>0d5a406a312eb91c640c6137ef4e90813baa8778</code>. It corrects the in-memory video BIOS panel table for the matching iMac10,1 display, changing 108 MHz to the EDID’s 138.5 MHz and setting RGB888/FPDI. The clock correction was not discovered in this project. <a href=\"https://doesitomarchy.com/fixes#omaboot.radeon-imac10-1-panel-clock\">OmaBoot?’s entry for the same model</a> documents the same patch and the grouped parameters <code>radeon.dpm=0 radeon.pcie_gen2=0 radeon.uvd=0</code>. The same three settings are in choyer’s <a href=\"https://github.com/choyer/omarchy-vintage-intel-imac-fix/blob/0d5a406a312eb91c640c6137ef4e90813baa8778/manifest.json#L12\">manifest</a> and <a href=\"https://github.com/choyer/omarchy-vintage-intel-imac-fix/blob/0d5a406a312eb91c640c6137ef4e90813baa8778/tools/write-limine-entry.py#L9\">Limine entry writer</a>. R2 uses that combination, but did not test each parameter independently.",
-          "<strong>Hyprland fix also adopted from choyer’s repository.</strong> The <a href=\"https://github.com/choyer/omarchy-vintage-intel-imac-fix/blob/0d5a406a312eb91c640c6137ef4e90813baa8778/hyprland/border-alpha.patch\"><code>hyprland/border-alpha.patch</code></a> file was applied unchanged to the <a href=\"https://github.com/hyprwm/Hyprland/blob/efb50993780079460b0cbed1363e2166a2de1d9f/src/render/shaders/glsl/border.glsl\">original Hyprland 0.56.2 window-border shader</a>. It replaces <code>discard</code> outside the border with a transparent output. The <a href=\"https://github.com/choyer/omarchy-vintage-intel-imac-fix/blob/0d5a406a312eb91c640c6137ef4e90813baa8778/README.md\">earlier README</a> describes its scope as border artifacts under the <code>llvmpipe</code> software renderer. It was not verified as a fix for Chromium flicker or a GPU hang on the physical machine.",
-          "<strong>This project integrated the existing fixes into an ISO that can start with the built-in screen.</strong> The <a href=\"https://github.com/choyer/omarchy-vintage-intel-imac-fix/blob/0d5a406a312eb91c640c6137ef4e90813baa8778/README.md\">earlier procedure</a> starts with the stock ISO and uses an external display or text terminal to install and apply the fixes. R2 rebuilds and signs packages for the original kernel and matching Hyprland base, then integrates a model-specific GRUB entry, initramfs, installation of the patched packages on the target, and regeneration of the Limine UKI. The Kbuild adjustment for building the module on its own is local build glue, not a change to the panel correction. Repacking and validation in a VM and on the actual iMac are this project’s work. R2 is an unofficial build. The Radeon and Hyprland fixes are credited above. The two later Chromium patches were developed and tested in this project."
-        ]
-      ],
-      [
-        "display",
-        "Radeon and the built-in display",
-        [
-          "The stock boot display was duplicated into four tiles. The modified R2 image was built from Omarchy 4.5.0 and corrects panel settings in memory, only for the matching model and 1080p internal panel. It changes the panel clock from 108 MHz to 138.5 MHz and enables RGB888/FPDI. The GPU ROM was not flashed.",
-          "The installer became readable, and the installed system used the built-in display at 1920×1080. This result is for one machine and does not establish support for other models or the unmodified image."
         ]
       ],
       [
@@ -297,6 +415,24 @@
         ]
       ],
       [
+        "chromium",
+        "Chromium redraw artifacts",
+        [
+          "Scrolling in Chromium produced flicker and black regions that failed to redraw. A temporary Hyprland test that repainted the whole display made little visible difference and was reverted.",
+          "Adding <code>--disable-gpu</code> as one line in <code>~/.config/chromium-flags.conf</code>, then fully quitting and reopening Chromium, stopped the flicker on this machine. To undo it, delete that line and reopen Chromium. This is an app-specific workaround, not a diagnosis of the root cause or a confirmed fix for other apps.",
+          "In a separate profile, the GPU-disable flag was omitted and Chromium ran through XWayland. During that test, Radeon’s graphics queue (ring 0) stalled. The driver reset the GPU, and Hyprland then crashed. After exiting Safe Mode to the login screen and signing in again, the normal desktop returned without rebooting Linux. At that stage the regular Chromium profile still started with the GPU disabled. This test should not be repeated as-is. The root cause and any playback benefit are unverified.",
+          "Video decoding is separate from rendering. The <a href=\"https://www.x.org/RadeonFeature/#radeon-uvd-unified-video-decoder-hardware\">Radeon feature table</a> lists H.264/AVC support on the RV730 video decoder, but not VP9 or AV1. That decoder is disabled in this build’s boot settings."
+        ]
+      ],
+      [
+        "codex-sign-in",
+        "Signing in to Codex CLI",
+        [
+          "Codex CLI was launched from Omarchy’s Agents panel. The 2009 iMac’s built-in Bluetooth 2.1 lacks the BLE required by the phone-based passkey QR flow. Choosing “Sign in with Device Code” and completing authorization in the iPhone browser worked for the CLI. It did not sign in the iMac’s browser or desktop app.",
+          "In the iMac’s browser, the ChatGPT passkey sign-in did not progress after I scanned the QR code with my iPhone. The built-in Bluetooth hardware lacks BLE for the phone proximity check."
+        ]
+      ],
+      [
         "login",
         "From power-on to the login screen",
         [
@@ -305,48 +441,13 @@
         ]
       ],
       [
-        "chromium",
-        "Chromium redraw artifacts",
+        "codex",
+        "Installing the Codex desktop app",
         [
-          "Scrolling in Chromium produced flicker and black regions that failed to redraw. A temporary Hyprland test that repainted the whole display made little visible difference and was reverted.",
-          "Adding <code>--disable-gpu</code> as one line in <code>~/.config/chromium-flags.conf</code>, then fully quitting and reopening Chromium, stopped the flicker on this machine. To undo it, delete that line and reopen Chromium. This is an app-specific workaround, not a diagnosis of the root cause or a confirmed fix for other apps.",
-          "In a separate profile, the GPU-disable flag was omitted and Chromium ran through XWayland. During that test, Radeon’s graphics queue (ring 0) stalled. The driver reset the GPU, and Hyprland then crashed. After exiting Safe Mode to the login screen and signing in again, the normal desktop returned without rebooting Linux. At that stage the regular Chromium profile still started with the GPU disabled. This test should not be repeated as-is. The root cause and any playback benefit are unverified.",
-          "Video decoding is separate from rendering. The <a href=\"https://www.x.org/RadeonFeature/#radeon-uvd-unified-video-decoder-hardware\">Radeon feature table</a> lists H.264/AVC support on the RV730 video decoder, but not VP9 or AV1. That decoder is disabled in this build’s boot settings.",
-          "<strong>Nov 24 follow-up on native Wayland.</strong> With GPU compositing enabled in a temporary profile, changing the background color alone reproduced the stale pixels. In all seven color changes, the sampled location in each of three tracked DMA-BUFs still held the previous color just before handoff to Wayland. Of 587 pixels in a vertical column on the display, all differed from the expected color after about 0.7 seconds and all matched after about 2.6 seconds. The later sample still matched when the intermediate capture was skipped. Artifacts in the initial frame persisted at the same sampling time.",
-          "Replacing partial damage with full updates and waiting on the available write-completion fences each left artifacts. Those tests did not locate the cause in Chromium, Mesa, or Hyprland.",
-          "<strong>Control with GPU compositing disabled.</strong> In a temporary profile with <code>--disable-gpu-compositing</code>, all eight compared frames matched the expected color, and WebGL remained available. Checksums confirmed that the regular Chromium configuration was preserved. The trial Google Chrome 158 installation and launcher were removed, and browsing data was kept.",
-          "An interim launcher kept GPU compositing active by animating a nearly transparent overlay on web pages. All 16 sampled background or scroll states showed the expected color at 125 ms, but this workaround did not cover internal browser pages. The source patches below replaced this experiment.",
-          "<strong>Nov 25 Readback test build.</strong> Chromium 155.0.8059.84 gained an optional path that synchronously reads back the composited GL frame and hands it to Wayland in shared memory (<code>wl_shm</code>). This bypasses the DMA-BUF import path used for presentation. The feature defaults to off. Enable it with <code>--enable-features=WaylandGLReadbackPresentation</code> for comparisons.",
-          "The first source patch selected shared-memory presentation. Its EGL configuration could not create the offscreen buffer needed for hardware readback on this Radeon. The second patch selects Mesa’s surfaceless EGL platform for that buffer on the Readback path. Both patches, applied in order, make up Readback v2.",
-          "On native Wayland, the iMac reported AMD RV730 through ANGLE OpenGL with GPU compositing and WebGL enabled. The test observed window-sized wl_shm buffers and zero GPU-process crashes. Two static pages tested three times each and eight scroll positions matched the browser capture outside the pointer area at the 5% comparison threshold. At all eight positions, the 587-pixel background sample line matched both initially and after settling.",
-          "Readback v2 became the default Chromium. After removing the distribution package, the app menu, terminal command, links opened with xdg-open, and Omarchy web apps used the patched build. The comparison launcher was retired. This user-local build is updated manually."
-        ]
-      ],
-      [
-        "video",
-        "H.264 playback on the Core 2 Duo",
-        [
-          "With UVD disabled at boot, the same 1080p30 H.264 clip played twice in mpv using CPU decoding. CPU use was 58.8% and 59.9% of one core, with zero dropped frames in both runs. When hardware decoding was requested, the player reported VA-API but Radeon rejected the decode request.",
-          "On a test boot with UVD enabled, stock Mesa decoded H.264 but produced visibly corrupted frames. An experimental Mesa 26.2.5 driver placed the compressed input in Radeon video memory and fixed synchronization at decoder teardown. Only the test processes loaded this driver.",
-          "For the same 18-second 1080p30 clip, we compared timestamps, sizes and pixel hashes against CPU decoding. With video-memory input switched on, off and on again in the patched driver, 540, 12 and 540 of the 540 frames matched. In a decode-only test, process CPU time fell from about 4.88 s to 0.47–0.64 s. Elapsed time increased from about 2.66 s to 9.45–9.62 s when the test waited for each hardware-decoded frame.",
-          "Displaying the video changed the result. With mpv output limited to 640×360, CPU decoding used 65.4% and 69.1% of one core in two runs. Hardware decoding with frames copied back to system memory used 68.0% and 68.7%. Direct GPU presentation worked in a short trial. Three displayed scenes showed no obvious corruption when compared with CPU playback.",
-          "The owner reported a freeze during the subsequent full-length comparison and powered the iMac off. The last file was an empty log from the start of the copy-back run. There was no record of the full-length direct-presentation run starting. The iMac rebooted with its usual <code>radeon.uvd=0</code> setting. The freeze’s cause and sustained playback stability remain open.",
-          "On Nov 27, one trial boot of 4.6 RC1 enabled <code>radeon.uvd=1</code>. FFmpeg decoded a local 1080p30 H.264 clip through Radeon VA-API with the experimental Mesa driver. All 60 frames matched the CPU reference hashes, with zero decode errors. Decoding and reading the frames back took about 1.65 seconds.",
-          "The installed Chromium Readback v2 was built with H.264 disabled and reported no supported streams for the same clip. A separate H.264-capable candidate is building. Hardware decoding and playback performance in Chromium and on YouTube remain unverified."
-        ]
-      ],
-      [
-        "updates",
-        "Testing the kernel ahead of Omarchy 4.6 RC1",
-        [
-          "On Nov 27, we added <code>7.3.6-1-omarchy</code> as a separate entry in Limine on the internal drive, keeping the existing Omarchy 4.5 boot as the default. The trial used the kernel shipped with 4.6 RC1 and the iMac’s Radeon panel fix. We verified that the VM could return to the original kernel before trying the iMac, without making a trial SD card. <a href=\"https://github.com/omacom/omarchy/releases/tag/v4.6.0-rc1\">Omarchy 4.6 RC1 release notes</a>",
-          "The first iMac trial stopped in emergency mode. During an earlier normal boot, a cleanup service moved the trial’s module tree because it had no owner in pacman. The trial image already contained Radeon. Once userspace started, missing VFAT and Netfilter modules blocked the <code>/boot</code> mount and firewall startup.",
-          "We put the entire trial module tree in a separate signed pacman package. In the VM, the modules survived when we booted the default 4.5 entry first. On the next iMac trial, <code>/boot</code> mounted and the firewall and SDDM started. Hyprland drove the built-in panel at 1920×1080, and its renderer log identified <code>AMD RV730</code>. Window borders and long-term stability still need separate checks.",
-          "This hardware trial used the Omarchy 4.5 desktop. In a separate test, we cloned the encrypted 4.5 VM disk and upgraded it in place to 4.6 RC1. The official repositories supplied Omarchy and the kernel. A signed repository on the build host supplied the iMac’s Radeon module and Hyprland border patch.",
-          "The upgraded VM unlocked its encrypted disk automatically and reached the SDDM sign-in screen. After signing in, we opened Foot and moved it to another workspace and across the screen. We then booted the saved Limine snapshot, restored it, and verified that the old <code>7.2.15-1-omarchy</code> kernel and Hyprland started from the normal boot entry.",
-          "On the iMac, we saved a 4.5 recovery snapshot and a read-only snapshot of the home volume, then installed <code>4.6.0rc1-2</code> and the iMac packages on the internal drive. After the settings migration, we verified the kernel, patched Radeon module, and automatic unlock files in the UKI for the normal boot entry.",
-          "After rebooting, SSH confirmed RC1 and kernel <code>7.3.6-1-omarchy</code>. The encrypted disk unlocked automatically, and the firewall and SDDM started. The iMac’s panel showed the desktop and Omarchy bar after sign-in. Hyprland drove the built-in <code>LVDS-1</code> at 1920×1080, and its renderer log identified the Radeon as <code>AMD RV730</code>. The 4.5 recovery entry remained in Limine.",
-          "The SSH update paused the settings migrations at the optional Chrome offer, which needs the desktop to display it. After signing in to RC1, we ran the remaining 14 migrations and verified that none were pending. Chromium was still the default browser. We opened a Foot terminal on the iMac and verified that its window could move across the display. Visual inspection of window borders and long-term stability are still pending."
+          "<strong>Desktop installation.</strong> The Codex task maintaining this record verified the signature and SHA-256 of OpenAI’s official Arch Linux package, version <code>26.1120.41243</code>. The app was extracted into user space, without running the installer or package hooks. This avoided a system upgrade. App updates are manual. <a href=\"https://learn.chatgpt.com/docs/linux/linux-app\">Official Linux guide</a>",
+          "Open <strong>ChatGPT (Codex)</strong> from the app menu or run <code>chatgpt</code> in a terminal. The launcher passes <code>--ozone-platform=wayland --disable-gpu</code> for the built-in Radeon. The <code>codex:</code> sign-in link was registered for the current user.",
+          "On the Core 2 Duo E7600 iMac, a headless run with a temporary profile initialized the sign-in screen and connected to the local Codex server, as confirmed in the app logs.",
+          "On Nov 24, a chat in the Codex desktop app on the iMac ran commands and carried out GUI checks. This work did not directly test a fresh sign-in."
         ]
       ],
       [
@@ -354,25 +455,116 @@
         "Desktop settings and development tools",
         [
           "The screen now locks and blanks after five idle minutes, with the animated screensaver disabled. Holding the pointer in the bottom-left corner for about a second also locks the session. The display blanked about seven seconds after moving the pointer there. Password authentication on return was verified.",
-          "zsh 5.9.2 was built from source in user space and selected as Foot’s startup shell. The standard <code>hostname%</code> prompt appeared. On Nov 27, we configured interactive SSH sessions to use the same zsh.",
+          "zsh 5.9.2 was built from source in user space and selected as Foot’s startup shell. The standard <code>hostname%</code> prompt appeared.",
           "Versions were checked for Git, GCC/G++, Make, Python, Node.js, npm, pnpm, Deno, Ruby, and Neovim. The Docker CLI was present. Starting a container has yet to be tested.",
-          "The iMac also had btop for observing CPU and memory during builds. Superwhisper was configured for cloud processing and bound to Option–Space for dictation.",
-          "Immediately after this reboot, Linux did not detect the USB optical mouse and Hyprland listed no mice. The kernel detected the same mouse again at 12:07 JST, and it was still registered as an input device that evening. Pointer movement on screen has yet to be confirmed."
+          "The iMac also had btop for observing CPU and memory during builds. Superwhisper was configured for cloud processing and bound to Option–Space for dictation."
         ]
       ],
       [
-        "codex",
-        "Codex CLI and the desktop app",
+        "chromium-wayland",
+        "Tracing stale frames on Wayland",
         [
-          "Codex CLI was launched from Omarchy’s Agents panel. The 2009 iMac’s built-in Bluetooth 2.1 lacks the BLE required by the phone-based passkey QR flow. Choosing “Sign in with Device Code” and completing authorization in the iPhone browser worked for the CLI. It did not sign in the iMac’s browser or desktop app.",
-          "In the iMac’s browser, the ChatGPT passkey sign-in did not progress after I scanned the QR code with my iPhone. The built-in Bluetooth hardware lacks BLE for the phone proximity check.",
-          "I connected my USB-C YubiKey to the iMac’s USB-A port with an adapter and signed in to my Google account on Omarchy. I also used the same YubiKey to sign in to ChatGPT in the browser.",
-          "<strong>Desktop installation.</strong> The Codex task maintaining this record verified the signature and SHA-256 of OpenAI’s official Arch Linux package, version <code>26.1120.41243</code>. The app was extracted into user space, without running the installer or package hooks. This avoided a system upgrade. App updates are manual. <a href=\"https://learn.chatgpt.com/docs/linux/linux-app\">Official Linux guide</a>",
-          "Open <strong>ChatGPT (Codex)</strong> from the app menu or run <code>chatgpt</code> in a terminal. The launcher passes <code>--ozone-platform=wayland --disable-gpu</code> for the built-in Radeon. The <code>codex:</code> sign-in link was registered for the current user.",
-          "On the Core 2 Duo E7600 iMac, a headless run with a temporary profile initialized the sign-in screen and connected to the local Codex server, as confirmed in the app logs.",
-          "On Nov 24, a chat in the Codex desktop app on the iMac ran commands and carried out GUI checks. This work did not directly test a fresh sign-in.",
-          "On Nov 27, we updated the app to <code>26.1120.50957</code> from a signature-verified official package. The updated app kept the sign-in and user data, opened a Wayland window, and ran commands in the existing Codex task. From a separate terminal, <code>chatgpt-update --check</code> checks the installed version against the official package and <code>chatgpt-update</code> replaces and relaunches the app.",
+          "<strong>Nov 24 follow-up on native Wayland.</strong> With GPU compositing enabled in a temporary profile, changing the background color alone reproduced the stale pixels. In all seven color changes, the sampled location in each of three tracked DMA-BUFs still held the previous color just before handoff to Wayland. Of 587 pixels in a vertical column on the display, all differed from the expected color after about 0.7 seconds and all matched after about 2.6 seconds. The later sample still matched when the intermediate capture was skipped. Artifacts in the initial frame persisted at the same sampling time.",
+          "Replacing partial damage with full updates and waiting on the available write-completion fences each left artifacts. Those tests did not locate the cause in Chromium, Mesa, or Hyprland.",
+          "<strong>Control with GPU compositing disabled.</strong> In a temporary profile with <code>--disable-gpu-compositing</code>, all eight compared frames matched the expected color, and WebGL remained available. Checksums confirmed that the regular Chromium configuration was preserved. The trial Google Chrome 158 installation and launcher were removed, and browsing data was kept.",
+          "An interim launcher kept GPU compositing active by animating a nearly transparent overlay on web pages. All 16 sampled background or scroll states showed the expected color at 125 ms, but this workaround did not cover internal browser pages. The source patches below replaced this experiment."
+        ]
+      ],
+      [
+        "chromium-readback",
+        "Making Chromium Readback v2 the default",
+        [
+          "<strong>Nov 25 Readback test build.</strong> Chromium 155.0.8059.84 gained an optional path that synchronously reads back the composited GL frame and hands it to Wayland in shared memory (<code>wl_shm</code>). This bypasses the DMA-BUF import path used for presentation. The feature defaults to off. Enable it with <code>--enable-features=WaylandGLReadbackPresentation</code> for comparisons.",
+          "The first source patch selected shared-memory presentation. Its EGL configuration could not create the offscreen buffer needed for hardware readback on this Radeon. The second patch selects Mesa’s surfaceless EGL platform for that buffer on the Readback path. Both patches, applied in order, make up Readback v2.",
+          "On native Wayland, the iMac reported AMD RV730 through ANGLE OpenGL with GPU compositing and WebGL enabled. The test observed window-sized wl_shm buffers and zero GPU-process crashes. Two static pages tested three times each and eight scroll positions matched the browser capture outside the pointer area at the 5% comparison threshold. At all eight positions, the 587-pixel background sample line matched both initially and after settling.",
+          "Readback v2 became the default Chromium. After removing the distribution package, the app menu, terminal command, links opened with xdg-open, and Omarchy web apps used the patched build. The comparison launcher was retired. This user-local build is updated manually."
+        ]
+      ],
+      [
+        "yubikey",
+        "Browser sign-in with a YubiKey",
+        [
+          "I connected my USB-C YubiKey to the iMac’s USB-A port with an adapter and signed in to my Google account on Omarchy. I also used the same YubiKey to sign in to ChatGPT in the browser."
+        ]
+      ],
+      [
+        "codex-graphics",
+        "GPU compositing in the Codex app",
+        [
           "A separate test enabled GPU compositing in the ChatGPT desktop app, which uses the bundled Owl engine. Visible flicker returned and an XWayland trial recorded a GPU-process crash. We ended the trial and kept GPU rendering disabled for this app. A port of the patches applied to upstream Chromium 158 source, but no patched Owl build or successful Owl rendering test was recorded."
+        ]
+      ],
+      [
+        "video",
+        "H.264 decoding tests",
+        [
+          "With UVD disabled at boot, the same 1080p30 H.264 clip played twice in mpv using CPU decoding. CPU use was 58.8% and 59.9% of one core, with zero dropped frames in both runs. When hardware decoding was requested, the player reported VA-API but Radeon rejected the decode request.",
+          "On a test boot with UVD enabled, stock Mesa decoded H.264 but produced visibly corrupted frames. An experimental Mesa 26.2.5 driver placed the compressed input in Radeon video memory and fixed synchronization at decoder teardown. Only the test processes loaded this driver.",
+          "For the same 18-second 1080p30 clip, we compared timestamps, sizes and pixel hashes against CPU decoding. With video-memory input switched on, off and on again in the patched driver, 540, 12 and 540 of the 540 frames matched. In a decode-only test, process CPU time fell from about 4.88 s to 0.47–0.64 s. Elapsed time increased from about 2.66 s to 9.45–9.62 s when the test waited for each hardware-decoded frame.",
+          "Displaying the video changed the result. With mpv output limited to 640×360, CPU decoding used 65.4% and 69.1% of one core in two runs. Hardware decoding with frames copied back to system memory used 68.0% and 68.7%. Direct GPU presentation worked in a short trial. Three displayed scenes showed no obvious corruption when compared with CPU playback.",
+          "The owner reported a freeze during the subsequent full-length comparison and powered the iMac off. The last file was an empty log from the start of the copy-back run. There was no record of the full-length direct-presentation run starting. The iMac rebooted with its usual <code>radeon.uvd=0</code> setting. The freeze’s cause and sustained playback stability remain open.",
+          "Immediately after this reboot, Linux did not detect the USB optical mouse and Hyprland listed no mice. The kernel detected the same mouse again at 12:07 JST, and it was still registered as an input device that evening. Pointer movement on screen has yet to be confirmed.",
+          "After installing RC1, we tested <a href=\"#youtube\">GPU decoding in Chromium and YouTube</a>."
+        ]
+      ],
+      [
+        "codex-update",
+        "Updating the Codex desktop app",
+        [
+          "On Nov 27, we updated the app to <code>26.1120.50957</code> from a signature-verified official package. The updated app kept the sign-in and user data, opened a Wayland window, and ran commands in the existing Codex task. From a separate terminal, <code>chatgpt-update --check</code> checks the installed version against the official package and <code>chatgpt-update</code> replaces and relaunches the app."
+        ]
+      ],
+      [
+        "updates",
+        "Trying the new kernel in Limine",
+        [
+          "On Nov 27, we added <code>7.3.6-1-omarchy</code> as a separate entry in Limine on the internal drive, keeping the existing Omarchy 4.5 boot as the default. The trial used the kernel shipped with 4.6 RC1 and the iMac’s Radeon panel fix. We verified that the VM could return to the original kernel before trying the iMac, without making a trial SD card. <a href=\"https://github.com/omacom/omarchy/releases/tag/v4.6.0-rc1\">Omarchy 4.6 RC1 release notes</a>",
+          "The first iMac trial stopped in emergency mode. During an earlier normal boot, a cleanup service moved the trial’s module tree because it had no owner in pacman. The trial image already contained Radeon. Once userspace started, missing VFAT and Netfilter modules blocked the <code>/boot</code> mount and firewall startup.",
+          "We put the entire trial module tree in a separate signed pacman package. In the VM, the modules survived when we booted the default 4.5 entry first. On the next iMac trial, <code>/boot</code> mounted and the firewall and SDDM started. Hyprland drove the built-in panel at 1920×1080, and its renderer log identified <code>AMD RV730</code>. Window borders and long-term stability still need separate checks.",
+          "The kernel trial was followed by the <a href=\"#rc1-upgrade\">in-place upgrade to 4.6 RC1</a>."
+        ]
+      ],
+      [
+        "ssh-zsh",
+        "Using the same zsh in Foot and SSH",
+        [
+          "Interactive SSH logins now start the same user-installed zsh 5.9.2 as Foot."
+        ]
+      ],
+      [
+        "rc1-upgrade",
+        "Upgrading from 4.5 to 4.6 RC1",
+        [
+          "The Limine kernel trial used the Omarchy 4.5 desktop. In a separate test, we cloned the encrypted 4.5 VM disk and upgraded it in place to 4.6 RC1. The official repositories supplied Omarchy and the kernel. A signed repository on the build host supplied the iMac’s Radeon module and Hyprland border patch.",
+          "The upgraded VM unlocked its encrypted disk automatically and reached the SDDM sign-in screen. After signing in, we opened Foot and moved it to another workspace and across the screen. We then booted the saved Limine snapshot, restored it, and verified that the old <code>7.2.15-1-omarchy</code> kernel and Hyprland started from the normal boot entry.",
+          "On the iMac, we saved a 4.5 recovery snapshot and a read-only snapshot of the home volume, then installed <code>4.6.0rc1-2</code> and the iMac packages on the internal drive. After the settings migration, we verified the kernel, patched Radeon module, and automatic unlock files in the UKI for the normal boot entry.",
+          "After rebooting, SSH confirmed RC1 and kernel <code>7.3.6-1-omarchy</code>. The encrypted disk unlocked automatically, and the firewall and SDDM started. The iMac’s panel showed the desktop and Omarchy bar after sign-in. Hyprland drove the built-in <code>LVDS-1</code> at 1920×1080, and its renderer log identified the Radeon as <code>AMD RV730</code>. The 4.5 recovery entry remained in Limine.",
+          "The SSH update paused the settings migrations at the optional Chrome offer, which needs the desktop to display it. After signing in to RC1, we ran the remaining 14 migrations and verified that none were pending. Chromium was still the default browser. We opened a Foot terminal on the iMac and verified that its window could move across the display. Visual inspection of window borders and long-term stability are still pending."
+        ]
+      ],
+      [
+        "youtube",
+        "YouTube GPU playback and CPU load",
+        [
+          "On Nov 27, one trial boot of 4.6 RC1 enabled <code>radeon.uvd=1</code>. FFmpeg decoded a local 1080p30 H.264 clip through Radeon VA-API with the experimental Mesa driver. All 60 frames matched the CPU reference hashes, with zero decode errors. Decoding and reading the frames back took about 1.65 seconds.",
+          "The installed Chromium Readback v2 was built with H.264 disabled and reported no supported streams for the same clip.",
+          "On Nov 27, we built a Chromium candidate with H.264 enabled. The first build selected Radeon’s <code>VaapiVideoDecoder</code> but stopped after four frames when Chromium could not import the decoded frame as a shared image. The next revision restored frame import and kept Wayland shared-memory presentation for the flicker workaround.",
+          "The revised build played all 60 frames of a local 1080p30 H.264 clip without drops. YouTube initially chose AV1. We added a setting that reports H.264 as the only supported video codec in the test profile. YouTube then used Radeon to decode 240p H.264 for about 8.2 seconds and rendered 195 frames with zero drops.",
+          "With the panel blanked and the same YouTube video fixed to 480p H.264, the Chromium processes used 45.3% CPU with software decoding and 46.3% with Radeon decoding. Neither run dropped frames in the roughly 20-second sample. Later instrumentation showed that the browser did not read back frames during playback with the panel off. All CPU percentages here use both cores as 100%.",
+          "With the panel on and a local 720p24 clip playing, CPU use on the video-processing thread fell from 6.7% with software decoding to 0.7% with Radeon. In the same 1600×940 window, total Chromium CPU fell from about 56% to 55%. Reducing the window to 960×650 brought Chromium CPU to about 36% with Radeon and the same source clip.",
+          "We kept the 1600×940 window and tried reading back only the changed area. In two roughly 10-second samples of the local 720p clip, partial readback cut CPU time in the readback call from 0.73 s to 0.28 s, transferred data from 1.27 GB to 0.49 GB, and dropped frames from 28 to 7. All 283 frames checked in a separate validation matched the full-frame reference pixel for pixel. Visual inspection of the panel and long-run stability are still pending.",
+          "With the panel on, the partial-readback build used Radeon for YouTube at 720p H.264. It dropped 51 of 372 frames in about 15.6 seconds. The iMac used about 98% CPU, with about 32% on Chromium’s renderer main thread alone. The full-frame readback control exited before a matched sample could be collected. These measurements used a test build and a temporary browser profile. <a href=\"https://www.youtube.com/watch?v=YE7VzlLtp-4\">Big Buck Bunny, the test video</a>",
+          "In November 2009, YouTube listed 360p as standard quality, 480p as high quality and 720p as HD. It added 1080p that month. In December, YouTube tested a lighter watch page called Feather that defaulted to standard quality and reduced features such as comments. The experimental HTML5 player for Safari followed in January 2010. Smooth standard-quality playback on a Mac of the time is plausible. We have yet to measure playback on this model using its original Mac OS X setup. <a href=\"https://blog.youtube/news-and-events/1080p-hd-comes-to-youtube/\">2009 quality announcement</a> · <a href=\"https://blog.youtube/news-and-events/introducing-feather-lighter-way-to/\">Feather announcement</a> · <a href=\"https://blog.youtube/news-and-events/introducing-youtube-html5-supported/\">HTML5 player announcement</a>"
+        ]
+      ],
+      [
+        "provenance",
+        "Patch provenance and what this project added",
+        [
+          "<strong>Base: official Omarchy.</strong> The boot media is based on the <a href=\"https://github.com/omacom/omarchy/releases/tag/v4.5.0\">official Omarchy 4.5.0 x86 release</a>. For the installer, two matching file hashes tied the relevant files in the image to the <a href=\"https://github.com/omacom/omarchy-iso/tree/d5136a69782c00fe8d53fc98e4f3a990447d4840\">reference omarchy-iso source</a>; the reference commit was not read from embedded ISO metadata. The kernel binary and compressed installation payload remain the official files.",
+          "<strong>Radeon fix adopted from choyer’s repository.</strong> The build uses <a href=\"https://github.com/choyer/omarchy-vintage-intel-imac-fix/blob/0d5a406a312eb91c640c6137ef4e90813baa8778/patches/panel-encoder-combined.patch\"><code>patches/panel-encoder-combined.patch</code></a> unchanged from reference commit <code>0d5a406a312eb91c640c6137ef4e90813baa8778</code>. It corrects the in-memory video BIOS panel table for the matching iMac10,1 display, changing 108 MHz to the EDID’s 138.5 MHz and setting RGB888/FPDI. The clock correction was not discovered in this project. <a href=\"https://doesitomarchy.com/fixes#omaboot.radeon-imac10-1-panel-clock\">OmaBoot?’s entry for the same model</a> documents the same patch and the grouped parameters <code>radeon.dpm=0 radeon.pcie_gen2=0 radeon.uvd=0</code>. The same three settings are in choyer’s <a href=\"https://github.com/choyer/omarchy-vintage-intel-imac-fix/blob/0d5a406a312eb91c640c6137ef4e90813baa8778/manifest.json#L12\">manifest</a> and <a href=\"https://github.com/choyer/omarchy-vintage-intel-imac-fix/blob/0d5a406a312eb91c640c6137ef4e90813baa8778/tools/write-limine-entry.py#L9\">Limine entry writer</a>. R2 uses that combination, but did not test each parameter independently.",
+          "<strong>Hyprland fix also adopted from choyer’s repository.</strong> The <a href=\"https://github.com/choyer/omarchy-vintage-intel-imac-fix/blob/0d5a406a312eb91c640c6137ef4e90813baa8778/hyprland/border-alpha.patch\"><code>hyprland/border-alpha.patch</code></a> file was applied unchanged to the <a href=\"https://github.com/hyprwm/Hyprland/blob/efb50993780079460b0cbed1363e2166a2de1d9f/src/render/shaders/glsl/border.glsl\">original Hyprland 0.56.2 window-border shader</a>. It replaces <code>discard</code> outside the border with a transparent output. The <a href=\"https://github.com/choyer/omarchy-vintage-intel-imac-fix/blob/0d5a406a312eb91c640c6137ef4e90813baa8778/README.md\">earlier README</a> describes its scope as border artifacts under the <code>llvmpipe</code> software renderer. It was not verified as a fix for Chromium flicker or a GPU hang on the physical machine.",
+          "<strong>This project integrated the existing fixes into an ISO that can start with the built-in screen.</strong> The <a href=\"https://github.com/choyer/omarchy-vintage-intel-imac-fix/blob/0d5a406a312eb91c640c6137ef4e90813baa8778/README.md\">earlier procedure</a> starts with the stock ISO and uses an external display or text terminal to install and apply the fixes. R2 rebuilds and signs packages for the original kernel and matching Hyprland base, then integrates a model-specific GRUB entry, initramfs, installation of the patched packages on the target, and regeneration of the Limine UKI. The Kbuild adjustment for building the module on its own is local build glue, not a change to the panel correction. Repacking and validation in a VM and on the actual iMac are this project’s work. R2 is an unofficial build. The Radeon and Hyprland fixes are credited above. The two later Chromium patches were developed and tested in this project."
         ]
       ],
       [
@@ -380,16 +572,22 @@
         "Patch and build settings",
         [
           "<a href=\"patches/chromium-155.0.8059.84/wayland-gl-readback.patch\" download>1. Wayland Readback patch for Chromium 155.0.8059.84</a> · <a href=\"patches/chromium-155.0.8059.84/readback-pbuffer-v2.patch\" download>2. EGL pbuffer fix</a> · <a href=\"patches/chromium-155.0.8059.84/SHA256SUMS\">SHA-256</a> · <a href=\"patches/chromium-155.0.8059.84/args.gn\">GN settings</a> · <a href=\"https://chromium.googlesource.com/chromium/src/+/5869fe313571d75152b77813cf0a4ee26a4e6df0\">Pinned Chromium source</a>",
-          "The build targets Linux x86_64 with Ozone Wayland. The iMac has a Core 2 Duo E7600 and Radeon HD 4670. Synchronous readback happens on every frame, so performance on this hardware needs its own measurement.",
+          "The build targets Linux x86_64 with Ozone Wayland. The iMac has a Core 2 Duo E7600 and Radeon HD 4670. The <a href=\"#youtube\">YouTube playback measurements</a> include the cost of full-frame readback and an experiment that reads back only changes.",
           "The Radeon panel correction and the Hyprland border shader fix came from an earlier project. The provenance section records the exact revisions used here.",
           "The full Linux x86_64 build ran in an amd64 Docker container on Apple Silicon, initially under QEMU and then Rosetta. On the iMac itself the two changed C++ objects compiled, and the full build stopped at 16,910 of 53,356 actions. The executable tested on the iMac came from the Apple Silicon host. Relinking v2 on that host took about 51 seconds with the previous objects available."
         ]
       ],
       [
         "references",
-        "References and revision log",
+        "References",
         [
-          "<a href=\"https://github.com/omacom/omarchy/releases/tag/v4.5.0\">Omarchy 4.5.0</a> · <a href=\"https://github.com/choyer/omarchy-vintage-intel-imac-fix/tree/0d5a406a312eb91c640c6137ef4e90813baa8778\">Earlier vintage Intel iMac fix</a>",
+          "<a href=\"https://github.com/omacom/omarchy/releases/tag/v4.5.0\">Omarchy 4.5.0</a> · <a href=\"https://github.com/choyer/omarchy-vintage-intel-imac-fix/tree/0d5a406a312eb91c640c6137ef4e90813baa8778\">Earlier vintage Intel iMac fix</a>"
+        ]
+      ],
+      [
+        "journal",
+        "Revision log",
+        [
           "Mon, Nov 23, 2026: Initial record covering installation, boot, Wi-Fi, and the Chromium workaround.",
           "Same-day update: recorded the XWayland GPU stall, desktop recovery, and Codex CLI sign-in.",
           "Same-day update: added how R2 was rebuilt from the official ISO and what the VM verified.",
@@ -401,7 +599,8 @@
           "Nov 25, 2026: confirmed sign-in to both Google and ChatGPT in the iMac’s browser with a YubiKey and a USB-A adapter.",
           "Nov 25 evening: recorded the 540-frame H.264 comparison, mpv playback load, the interrupted full-length test and USB mouse redetection after reboot.",
           "Nov 27, 2026: documented the Limine trial, the first boot failure and the fix to package the trial modules. Added the VM and iMac in-place upgrades to 4.6 RC1, the VM’s return to 4.5, and the iMac’s 1080p Radeon desktop and completed migrations.",
-          "Nov 27, 2026: added the 60-frame H.264 decode check on 4.6 RC1, the installed Chromium’s lack of H.264 support, and the Codex app update."
+          "Nov 27, 2026: added the 60-frame H.264 decode check on 4.6 RC1, the installed Chromium’s lack of H.264 support, and the Codex app update.",
+          "Nov 27 evening: added H.264 GPU decoding in YouTube, CPU measurements with the panel on and off, pixel checks for partial readback, and the 2009 playback context. Reordered the diary and its contents by date."
         ]
       ]
     ],
@@ -420,6 +619,61 @@
         1522,
         "After installing from R2",
         "The same iMac shows one complete Omarchy desktop across its built-in display."
+      ]
+    ],
+    "chapters": [
+      [
+        "2026-11-23",
+        "Nov 23 · Installation and first boot",
+        [
+          "display",
+          "iso",
+          "storage",
+          "install",
+          "chromium",
+          "codex-sign-in"
+        ]
+      ],
+      [
+        "2026-11-24",
+        "Nov 24 · Sign-in and rendering",
+        [
+          "login",
+          "codex",
+          "daily",
+          "chromium-wayland"
+        ]
+      ],
+      [
+        "2026-11-25",
+        "Nov 25 · Browser and video",
+        [
+          "chromium-readback",
+          "yubikey",
+          "codex-graphics",
+          "video"
+        ]
+      ],
+      [
+        "2026-11-27",
+        "Nov 27 · RC1 and YouTube",
+        [
+          "codex-update",
+          "updates",
+          "ssh-zsh",
+          "rc1-upgrade",
+          "youtube"
+        ]
+      ],
+      [
+        "record",
+        "Patches, sources and revisions",
+        [
+          "provenance",
+          "patches",
+          "references",
+          "journal"
+        ]
       ]
     ]
   }

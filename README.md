@@ -35,7 +35,7 @@ buildtools/linux64/gn gen out/imac-wayland --fail-on-unused-args
 third_party/ninja/ninja -C out/imac-wayland chrome chrome_sandbox
 ```
 
-The iMac ran Readback v2 under native Wayland with Radeon GPU compositing and WebGL enabled. In six static captures and eight scroll positions, only the pointer region differed at the test threshold. The GPU process recorded zero crashes during the test. The patched build became the default browser. Long-term stability and the performance cost of readback remain unmeasured.
+The iMac ran Readback v2 under native Wayland with Radeon GPU compositing and WebGL enabled. In six static captures and eight scroll positions, only the pointer region differed at the test threshold. The GPU process recorded zero crashes during the test. The patched build became the default browser. The [video measurements](docs/index.html#youtube) record later H.264 test builds, the cost of full-frame readback, and the partial-readback experiment. Long-term stability is still pending.
 
 The Radeon panel correction and Hyprland border shader fix came from an earlier project. The [patch provenance](https://dueyama.github.io/omarchy-imac-field-notes/#provenance) section links to the exact revisions used here.
 
@@ -43,6 +43,6 @@ The Radeon panel correction and Hyprland border shader fix came from an earlier 
 
 The publication source for `dueyama/omarchy-imac-field-notes` is the generated HTML in `docs/`. In Pages settings, choose **Deploy from a branch**, then **`main`** and **`/docs`**. GitHub Pages serves the generated HTML directly. [Configuring a publishing source for GitHub Pages](https://docs.github.com/en/pages/getting-started-with-github-pages/configuring-a-publishing-source-for-your-github-pages-site)
 
-Edit `content.json` and run `python3 build.py --site-url https://dueyama.github.io/omarchy-imac-field-notes/` to regenerate both languages with their canonical and social preview URLs.
+Edit `content.json` and run `python3 build.py --site-url https://dueyama.github.io/omarchy-imac-field-notes/` to regenerate both languages with their canonical and social preview URLs. List diary chapters by date, oldest first, and keep reference material in the final chapter. The `chapters` lists set the reading order for both the article and its contents. Keep existing section IDs when moving a note so its links continue to work.
 
 The migration starts from published version 9 (`0d8803b53c362119818809c76f2120e3817d695e`). Before updating the notice on the original site, check language switching, both photos, and the patch download on the new URL. [Original ChatGPT Sites field notes](https://omarchy-imac-field-notes.dueyama.chatgpt.site/)
